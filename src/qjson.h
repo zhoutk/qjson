@@ -42,7 +42,7 @@ namespace QJSON {
 	};
 
 	class Json final {
-	public:
+		public:
 		Json() : type(Type::Object) {
 			_obj_ = new QJsonDocument;
 		}
@@ -93,11 +93,10 @@ namespace QJSON {
 		template<typename T> bool appendValue(const QString& typeStr, const QString& name, const T& value){
 			if(typeStr.contains("QJSON::Json"))
 				return false;
-			JsonProc* jp = getJsonProcFunc();
-			if(jp){
+			jPtr = getJsonProcFunc();		//return nullptr but Object and Array
+			if(jPtr){
 				QVariant data = value;
-				jp->appendValue(this->_obj_, name, data);
-				delete jp;
+				jPtr->appendValue(this->_obj_, name, data);
 				return true;
 			}else{
 				return false;
@@ -108,7 +107,7 @@ namespace QJSON {
 			return this->_obj_->toJson(QJsonDocument::Compact);;
 		}
 
-	private:
+		private:
 		enum Type {
 			Error,
 			False,
@@ -122,13 +121,27 @@ namespace QJSON {
 		Type type;
 		QJsonDocument* _obj_;
 
-		class JsonProc {
+		~Json(){
+			if(_obj_)
+				delete _obj_;
+			if(jPtr)
+				delete jPtr;
+		}
+
+		class JsonProc abstract {
 			public:
 			virtual void appendValue(QJsonDocument*& obj, const QString& name, const QVariant& value) = 0;
 		};
 
 		class ObjectProc : public JsonProc {
 			public:
+			static ObjectProc* Instance(){
+				if(appPtr == nullptr)
+					appPtr = new ObjectProc;
+				return appPtr;
+				
+			}
+
 			void appendValue(QJsonDocument*& obj, const QString& name, const QVariant& value){
 				QJsonObject json = obj->object();
 				if (json.contains(name))
@@ -137,29 +150,61 @@ namespace QJSON {
 				delete obj;
 				obj = new QJsonDocument(json);
 			}
+
+			~ObjectProc(){
+				if(appPtr)
+					delete appPtr;
+			}
+			private:
+			ObjectProc() {}
+			ObjectProc(const ObjectProc &) = delete;
+			ObjectProc &operator=(const ObjectProc &) = delete;
+
+			static ObjectProc* appPtr;
 		};
 
 		class ArrayProc : public JsonProc {
 			public:
+			static ArrayProc* Instance(){
+				if(appPtr == nullptr)
+					appPtr = new ArrayProc;
+				return appPtr;
+				
+			}
+
 			void appendValue(QJsonDocument*& obj, const QString& name, const QVariant& value){
 				QJsonArray json = obj->array();
 				json.push_back(value.toString());
 				delete obj;
 				obj = new QJsonDocument(json);
 			}
+
+			~ArrayProc(){
+				if(appPtr)
+					delete appPtr;
+			}
+			private:
+			ArrayProc() {}
+			ArrayProc(const ArrayProc &) = delete;
+			ArrayProc &operator=(const ArrayProc &) = delete;
+
+			static ArrayProc* appPtr;
 		};
+
 
 		JsonProc* getJsonProcFunc() {
 			if (this->type == Type::Object) {
-				return new ObjectProc;
+				return ObjectProc::Instance();
 			}
 			else if (this->type == Type::Array) {
-				return new ArrayProc;
+				return ArrayProc::Instance();
 			}
 			else {
 				return nullptr;
 			}
 		}
+
+		JsonProc* jPtr;
 	};
 
 }

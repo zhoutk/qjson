@@ -13,8 +13,7 @@ TEST(TestObject, test_object_1) {
 	// long l = 123;
 	// long long ll = 56789;
 	 Json sub;
-	 bool flag = sub.addSubitem("first", "this is the first.");
-	 EXPECT_EQ(flag, true);
+	 EXPECT_EQ(sub.addSubitem("first", "this is the first."), true);
 	// Json subb;
 	// EXPECT_EQ(subb.addSubitem("sub2-1", "the second sub object."), true);
 	// EXPECT_EQ(subb.addSubitem("sub2-2", "the second field."), true);
