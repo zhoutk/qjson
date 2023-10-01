@@ -43,11 +43,11 @@ namespace QJSON {
 
 	class Json final {
 		public:
-		Json() : type(Type::Object) {
+		Json() : type(Type::Object), jPtr(nullptr) {
 			_obj_ = new QJsonDocument;
 		}
 
-		Json(JsonType type) : type((Type)type){
+		Json(JsonType type) : type((Type)type), jPtr(nullptr){
 			_obj_ = new QJsonDocument;
 		}
 
@@ -110,8 +110,10 @@ namespace QJSON {
 		~Json() {
 			if (_obj_)
 				delete _obj_;
-			if (jPtr)
-				delete jPtr;
+			if (oPtr)
+				delete oPtr;
+			if (aPtr)
+				delete aPtr;
 		}
 
 		private:
@@ -195,16 +197,18 @@ namespace QJSON {
 
 		JsonProc* getJsonProcFunc() {
 			if (this->type == Type::Object) {
-				return ObjectProc::Instance();
+				return oPtr;
 			}
 			else if (this->type == Type::Array) {
-				return ArrayProc::Instance();
+				return aPtr;
 			}
 			else {
 				return nullptr;
 			}
 		}
 		JsonProc* jPtr;
+		static ObjectProc* oPtr;
+		static ArrayProc* aPtr;
 	};
 
 }
