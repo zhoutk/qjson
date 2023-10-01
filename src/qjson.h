@@ -107,6 +107,13 @@ namespace QJSON {
 			return this->_obj_->toJson(QJsonDocument::Compact);;
 		}
 
+		~Json() {
+			if (_obj_)
+				delete _obj_;
+			if (jPtr)
+				delete jPtr;
+		}
+
 		private:
 		enum Type {
 			Error,
@@ -121,13 +128,7 @@ namespace QJSON {
 		Type type;
 		QJsonDocument* _obj_;
 
-		~Json(){
-			if(_obj_)
-				delete _obj_;
-			if(jPtr)
-				delete jPtr;
-		}
-
+	public:
 		class JsonProc abstract {
 			public:
 			virtual void appendValue(QJsonDocument*& obj, const QString& name, const QVariant& value) = 0;
@@ -203,7 +204,6 @@ namespace QJSON {
 				return nullptr;
 			}
 		}
-
 		JsonProc* jPtr;
 	};
 
