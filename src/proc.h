@@ -1,6 +1,7 @@
 #pragma once
+//#pragma execution_character_set("utf-8")
 
-#include <QJsonDocument >
+#include <QJsonDocument>
 #include <QString>
 #include <QDebug>
 #include <QJsonObject>
@@ -14,7 +15,7 @@ namespace QJSON {
 		Array = 7
 	};
 
-	class JsonProc abstract {
+	class JsonProc {
 		public:
 		virtual void appendValue(QJsonDocument*& obj, const QString& name, const QVariant* value) = 0;
 	};
@@ -34,8 +35,10 @@ namespace QJSON {
 				json.remove(name);
 			if (value == nullptr)
 				json.insert(name, QJsonValue::Null);
-			else
+			else {
+				std::string dd = value->toString().toStdString();
 				json.insert(name, QJsonValue::fromVariant(*value));
+			}
 			delete obj;
 			obj = new QJsonDocument(json);
 		}

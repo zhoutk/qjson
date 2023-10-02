@@ -1,4 +1,5 @@
 #pragma once
+//#pragma execution_character_set("utf-8")
 
 #include "proc.h"
 
@@ -6,6 +7,19 @@ namespace QJSON {
 
 	class Json final {
 		public:
+		template <typename T> bool addSubitem(const QString& name, const T& value)
+		{
+			jPtr = getJsonProcFunc();		//return nullptr but Object and Array
+			if (jPtr) {
+				QVariant data = value;
+				jPtr->appendValue(this->_obj_, name, &data);
+				return true;
+			}
+			else {
+				return false;
+			}
+		};
+
 		Json() : type(Type::Object), jPtr(nullptr) {
 			_obj_ = new QJsonDocument;
 		}
@@ -29,38 +43,12 @@ namespace QJSON {
 			new (this)Json(jstr.toUtf8());
 		}
 
-		template <typename T> bool addSubitem(const QString &name, const T &value)
-		{
-			jPtr = getJsonProcFunc();		//return nullptr but Object and Array
-			if (jPtr) {
-				QVariant data = value;
-				jPtr->appendValue(this->_obj_, name, &data);
-				return true;
-			}
-			else {
-				return false;
-			}
-		};
-		template <> bool addSubitem(const QString& name, const std::nullptr_t& value) {
-			jPtr = getJsonProcFunc();
-			if (jPtr) {
-				jPtr->appendValue(this->_obj_, name, nullptr);
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		template <> bool addSubitem(const QString& name, const Json& value) {
-			return addValueJson(name, value);
-		}
-
 		bool addValueJson(const QString& name, const Json& obj){
 			return true;
 		}
 
 		QString toString(){
-			return this->_obj_->toJson(QJsonDocument::Compact);;
+			return this->_obj_->toJson(QJsonDocument::Compact);
 		}
 
 		~Json() {
@@ -96,5 +84,19 @@ namespace QJSON {
 		}
 
 	};
+
+	template <> bool Json::addSubitem(const QString& name, const std::nullptr_t& value) {
+		jPtr = getJsonProcFunc();
+		if (jPtr) {
+			jPtr->appendValue(this->_obj_, name, nullptr);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	template <> bool Json::addSubitem(const QString& name, const Json& value) {
+		return addValueJson(name, value);
+	}
 
 }

@@ -32,6 +32,35 @@
                 "strategy": "external"
             },
             "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+        },
+        {
+            "name": "linux-base",
+            "displayName": "Linux Debug",
+            "description": "远程 Linux 系统。",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "cacheVariables": {
+                
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "environment": {
+                "QTDIR": "/opt/Qt5.12.12/5.12.12/gcc_64",
+                "LD_LIBRARY_PATH": "/opt/runlibs"
+            },
+            "vendor": { "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/vs/$ms{projectDirName}" } }
+        },
+        {
+            "name": "linux-debug",
+            "displayName": "Linux",
+            "description": "Linux (64 位)(Debug)",
+            "inherits": "linux-base",
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
         }
     ]
 }

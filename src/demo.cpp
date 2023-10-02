@@ -1,3 +1,5 @@
+//#pragma execution_character_set("utf-8")
+
 #include "qjson.h"
 #include <QDebug>
 
@@ -8,6 +10,7 @@ int main(int argc, char* argv[])
 	// Json rs(JsonType::Array);
 
 	Json one(JsonType::Object);
+	one.addSubitem(QStringLiteral("中文"), "中文测试");
 	one.addSubitem("null", nullptr);
 	one.addSubitem("num0", 0);
 	one.addSubitem("num1", 123);
@@ -16,7 +19,6 @@ int main(int argc, char* argv[])
 	one.addSubitem("boolF", false);
 	one.addSubitem("boolT", true);
 	one.addSubitem("first", "number one");
-	one.addSubitem("中文", "中文测试");
 
 	qDebug() << one.toString();
 
