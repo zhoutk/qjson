@@ -8,32 +8,6 @@
 #include <QJsonParseError>
 
 namespace QJSON {
-	#define GetTypeName(T) check_type<T>()
-	#define GetVarTypeName(var) check_type<decltype(var)>()
-
-	template <typename T>
-	struct check
-	{
-		check(QString& out)
-		{
-	#   if defined(__GNUC__)
-			char* real_name = abi::__cxa_demangle(typeid(T).name(), nullptr, nullptr, nullptr);
-			out = real_name;
-			free(real_name);
-	#   else
-			out = typeid(T).name();
-	#   endif
-		}
-	};
-
-	template <typename T>
-	inline QString check_type(void)
-	{
-		QString str;
-		check<T> { str };
-		return str;
-	}
-
 	enum class JsonType
 	{
 		Object = 6,
@@ -42,7 +16,7 @@ namespace QJSON {
 
 	class JsonProc abstract {
 		public:
-		virtual void appendValue(QJsonDocument*& obj, const QString& name, const QVariant& value) = 0;
+		virtual void appendValue(QJsonDocument*& obj, const QString& name, const QVariant* value) = 0;
 	};
 
 	class ObjectProc : public JsonProc {
@@ -54,11 +28,14 @@ namespace QJSON {
 			
 		}
 
-		void appendValue(QJsonDocument*& obj, const QString& name, const QVariant& value){
+		void appendValue(QJsonDocument*& obj, const QString& name, const QVariant* value){
 			QJsonObject json = obj->object();
 			if (json.contains(name))
 				json.remove(name);
-			json.insert(name, value.toString());
+			if (value == nullptr)
+				json.insert(name, QJsonValue::Null);
+			else
+				json.insert(name, QJsonValue::fromVariant(*value));
 			delete obj;
 			obj = new QJsonDocument(json);
 		}
@@ -74,6 +51,7 @@ namespace QJSON {
 
 		static ObjectProc* appPtr;
 	};
+	ObjectProc* ObjectProc::appPtr = nullptr;
 
 	class ArrayProc : public JsonProc {
 		public:
@@ -84,9 +62,12 @@ namespace QJSON {
 			
 		}
 
-		void appendValue(QJsonDocument*& obj, const QString& name, const QVariant& value){
+		void appendValue(QJsonDocument*& obj, const QString& name, const QVariant* value){
 			QJsonArray json = obj->array();
-			json.push_back(value.toString());
+			if (value == nullptr)
+				json.push_back(QJsonValue::Null);
+			else
+				json.push_back(QJsonValue::fromVariant(*value));
 			delete obj;
 			obj = new QJsonDocument(json);
 		}
@@ -102,4 +83,5 @@ namespace QJSON {
 
 		static ArrayProc* appPtr;
 	};
+	ArrayProc* ArrayProc::appPtr = nullptr;
 }

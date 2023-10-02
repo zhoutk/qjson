@@ -29,41 +29,34 @@ namespace QJSON {
 			new (this)Json(jstr.toUtf8());
 		}
 
-		template <typename T>
-		bool addSubitem(const QString &name, const T &value)
+		template <typename T> bool addSubitem(const QString &name, const T &value)
 		{
-			if (this->type == Type::Object || this->type == Type::Array)
-			{
-				QString typeStr = GetTypeName(T);
-				if (typeStr.contains("QJSON::Json"))
-				{
-					Json temp;
-					return addValueJson(name, temp);
-				}
-				else
-				{
-					return appendValue(typeStr, name, value);
-				}
+			jPtr = getJsonProcFunc();		//return nullptr but Object and Array
+			if (jPtr) {
+				QVariant data = value;
+				jPtr->appendValue(this->_obj_, name, &data);
+				return true;
 			}
-			else
+			else {
 				return false;
+			}
 		};
+		template <> bool addSubitem(const QString& name, const std::nullptr_t& value) {
+			jPtr = getJsonProcFunc();
+			if (jPtr) {
+				jPtr->appendValue(this->_obj_, name, nullptr);
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		template <> bool addSubitem(const QString& name, const Json& value) {
+			return addValueJson(name, value);
+		}
 
 		bool addValueJson(const QString& name, const Json& obj){
 			return true;
-		}
-
-		template<typename T> bool appendValue(const QString& typeStr, const QString& name, const T& value){
-			if(typeStr.contains("QJSON::Json"))
-				return false;
-			jPtr = getJsonProcFunc();		//return nullptr but Object and Array
-			if(jPtr){
-				QVariant data = value;
-				jPtr->appendValue(this->_obj_, name, data);
-				return true;
-			}else{
-				return false;
-			}
 		}
 
 		QString toString(){
@@ -71,12 +64,6 @@ namespace QJSON {
 		}
 
 		~Json() {
-			if (_obj_)
-				delete _obj_;
-			if (oPtr)
-				delete oPtr;
-			if (aPtr)
-				delete aPtr;
 		}
 
 		private:
@@ -95,15 +82,13 @@ namespace QJSON {
 
 
 		JsonProc* jPtr;
-		static ObjectProc* oPtr;
-		static ArrayProc* aPtr;
 		
 		JsonProc* getJsonProcFunc() {
 			if (this->type == Type::Object) {
-				return oPtr;
+				return ObjectProc::Instance();
 			}
 			else if (this->type == Type::Array) {
-				return aPtr;
+				return ArrayProc::Instance();
 			}
 			else {
 				return nullptr;

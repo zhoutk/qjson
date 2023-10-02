@@ -75,7 +75,7 @@ if (CMAKE_QJSON_ENABLE_TEST)
     #target_link_libraries(test_test gtest gtest_main)
     #add_test(NAME test_test COMMAND test_test)
 
-    add_executable(test_object tests/test_object.cpp src/qjson.cpp)
+    add_executable(test_object tests/test_object.cpp)
     target_link_libraries(test_object gtest gtest_main Qt5::Core)
     add_test(NAME test_object COMMAND test_object)
 
