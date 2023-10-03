@@ -19,6 +19,13 @@ namespace QJSON {
 			}
 		};
 
+		template<typename T> bool addSubitem(const T& value) {
+			if (this->type == Type::Array)
+				return addSubitem("", value);
+			else
+				return false;
+		}
+
 		Json() : Json(JsonType::Object) {}
 
 		Json(JsonType type) : type((Type)type), jPtr(nullptr) {
@@ -67,11 +74,17 @@ namespace QJSON {
 			}
 		}
 
+		Json(const Json& origin) {
+			this->type = origin.type;
+			this->vdata = origin.vdata;
+			this->_obj_ = new QJsonDocument(*origin._obj_);
+		}
+
 		bool addValueJson(const QString& name, const Json& obj){
 			return true;
 		}
 
-		QString toString(){
+		QString toString() const {
 			switch (this->type)
 			{
 			case Type::Array:
@@ -143,7 +156,16 @@ namespace QJSON {
 		}
 	}
 	template <> bool Json::addSubitem(const QString& name, const Json& value) {
-		return addValueJson(name, value);
+		jPtr = getJsonProcFunc();
+		if (jPtr) {
+
+			jPtr->addValueJson(this->_obj_, name, value.toString());
+			return true;
+		}
+		else {
+			return false;
+		}
+		//return addValueJson(name, value);
 	}
 
 }

@@ -8,6 +8,7 @@
 #include <QJsonParseError>
 
 namespace QJSON {
+
 	enum class JsonType
 	{
 		Object = 6,
@@ -17,6 +18,7 @@ namespace QJSON {
 	class JsonProc {
 		public:
 		virtual void appendValue(QJsonDocument*& obj, const QString& name, const QVariant* value) = 0;
+		virtual void addValueJson(QJsonDocument*& obj, const QString& name, const QString& jStr) = 0;
 	};
 
 	class ObjectProc : public JsonProc {
@@ -37,6 +39,19 @@ namespace QJSON {
 			else {
 				std::string dd = value->toString().toStdString();
 				json.insert(name, QJsonValue::fromVariant(*value));
+			}
+			delete obj;
+			obj = new QJsonDocument(json);
+		}
+
+		void addValueJson(QJsonDocument*& obj, const QString& name, const QString& jStr) {
+			QJsonObject json = obj->object();
+			if (json.contains(name))
+				json.remove(name);
+			QJsonParseError json_error;
+			QJsonDocument jsonDocument = QJsonDocument::fromJson(jStr.toUtf8(), &json_error);
+			if (json_error.error == QJsonParseError::NoError) {
+				json.insert(name, QJsonValue::fromVariant(QVariant(jsonDocument)));
 			}
 			delete obj;
 			obj = new QJsonDocument(json);
@@ -70,6 +85,17 @@ namespace QJSON {
 				json.push_back(QJsonValue::Null);
 			else
 				json.push_back(QJsonValue::fromVariant(*value));
+			delete obj;
+			obj = new QJsonDocument(json);
+		}
+
+		void addValueJson(QJsonDocument*& obj, const QString& name, const QString& jStr) {
+			QJsonArray json = obj->array();
+			QJsonParseError json_error;
+			QJsonDocument jsonDocument = QJsonDocument::fromJson(jStr.toUtf8(), &json_error);
+			if (json_error.error == QJsonParseError::NoError) {
+				json.push_back(QJsonValue::fromVariant(QVariant(jsonDocument)));
+			}
 			delete obj;
 			obj = new QJsonDocument(json);
 		}

@@ -7,22 +7,26 @@ using namespace QJSON;
 
 int main(int argc, char* argv[])
 {
-	// Json rs(JsonType::Array);
+	Json rs(JsonType::Object);
+	Json a = Json("{\"a\":\"abc\"}");
+	Json one(JsonType::Object);
+	one.addSubitem("中文", "中文测试");
 
-	Json a = Json("nullptr");
+	rs.addSubitem("first of one", one);
 
-	//Json one(JsonType::Object);
-	//one.addSubitem(QStringLiteral("中文"), "中文测试");
-	//one.addSubitem("null", nullptr);
-	//one.addSubitem("num0", 0);
-	//one.addSubitem("num1", 123);
-	//one.addSubitem("float", 11.123);
-	//one.addSubitem("double", 211.54321);
-	//one.addSubitem("boolF", false);
-	//one.addSubitem("boolT", true);
-	//one.addSubitem("first", "number one");
+	one.addSubitem("null", nullptr);
+	one.addSubitem("num0", 0);
+	one.addSubitem("num1", 123);
+	one.addSubitem("float", 11.123);
+	one.addSubitem("double", 211.54321);
+	one.addSubitem("boolF", false);
+	one.addSubitem("boolT", true);
+	one.addSubitem("first", "number one");
 
-	qDebug() << a.toString();
+	rs.addSubitem("a object", a);
+	rs.addSubitem("all of one", one);
+
+	qDebug() << rs.toString();
 
 	getchar();
 	// Json sub(JsonType::Array);
