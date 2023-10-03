@@ -9,18 +9,20 @@ int main(int argc, char* argv[])
 {
 	// Json rs(JsonType::Array);
 
-	Json one(JsonType::Object);
-	one.addSubitem(QStringLiteral("中文"), "中文测试");
-	one.addSubitem("null", nullptr);
-	one.addSubitem("num0", 0);
-	one.addSubitem("num1", 123);
-	one.addSubitem("float", 11.123);
-	one.addSubitem("double", 211.54321);
-	one.addSubitem("boolF", false);
-	one.addSubitem("boolT", true);
-	one.addSubitem("first", "number one");
+	Json a = Json("nullptr");
 
-	qDebug() << one.toString();
+	//Json one(JsonType::Object);
+	//one.addSubitem(QStringLiteral("中文"), "中文测试");
+	//one.addSubitem("null", nullptr);
+	//one.addSubitem("num0", 0);
+	//one.addSubitem("num1", 123);
+	//one.addSubitem("float", 11.123);
+	//one.addSubitem("double", 211.54321);
+	//one.addSubitem("boolF", false);
+	//one.addSubitem("boolT", true);
+	//one.addSubitem("first", "number one");
+
+	qDebug() << a.toString();
 
 	getchar();
 	// Json sub(JsonType::Array);
