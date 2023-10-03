@@ -20,7 +20,7 @@ if(MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup") 
 	add_definitions(-D__WIN__)
     string(APPEND CMAKE_CXX_FLAGS " /Zc:__cplusplus")
-	add_compile_options(/wd26451 /wd26812 /wd4305 /wd4244 /wd6031 /wd26495)
+	add_compile_options(/wd26451 /wd26812 /wd4305 /wd4244 /wd6031 /wd26495 /wd26439)
 
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")

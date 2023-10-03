@@ -37,7 +37,6 @@ namespace QJSON {
 			if (value == nullptr)
 				json.insert(name, QJsonValue::Null);
 			else {
-				std::string dd = value->toString().toStdString();
 				json.insert(name, QJsonValue::fromVariant(*value));
 			}
 			delete obj;
