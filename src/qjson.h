@@ -137,6 +137,26 @@ namespace QJSON {
 			}
 		}
 
+		bool contains(const QString& key) {
+			Json f = (*this)[key];
+			return !(f.type == Type::Null || f.type == Type::Error);
+		}
+
+		QString getValueType() {
+			return TYPENAMES[this->type];
+		}
+
+		Json getAndRemove(const QString& key) {
+			Json rs = (*this)[key];
+			if ((rs.type != Type::Null && rs.type != Type::Error)) {
+				QJsonObject obj = this->_obj_->object();
+				obj.remove(key);
+				delete this->_obj_;
+				this->_obj_ = new QJsonDocument(obj);
+			}
+			return rs;
+		}
+
 		~Json() {
 			if (_obj_)
 				delete _obj_;
@@ -153,6 +173,7 @@ namespace QJSON {
 			Object,
 			Array
 		};
+		QStringList TYPENAMES {"Error", "False", "True", "Null", "Number", "String", "Object", "Array"};
 		Type type;
 		QJsonDocument* _obj_;
 		QString vdata;

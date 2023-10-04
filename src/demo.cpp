@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
 {
 	Json rs(JsonType::Object);
 	Json a = Json("{\"a\":\"abc\"}");
-	Json one(JsonType::Array);
+	Json one(JsonType::Object);
 	one.addSubitem("中文", "中文测试");
 
 	rs.addSubitem("first of one", one);
@@ -26,7 +26,9 @@ int main(int argc, char* argv[])
 	rs.addSubitem("a object", a);
 	rs.addSubitem("all of one", one);
 
-	qDebug() << rs["all of one1"].toString();
+	QString key = "num1";
+	qDebug() << one.getAndRemove(key).toString();
+	qDebug() << "  ---  " << one.toString();
 
 	getchar();
 	// Json sub(JsonType::Array);
