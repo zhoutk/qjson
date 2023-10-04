@@ -26,18 +26,54 @@ namespace QJSON {
 				return false;
 		}
 
+#ifdef __WIN__
+		template <> bool Json::addSubitem(const QString& name, const std::nullptr_t&) {
+			jPtr = getJsonProcFunc();
+			if (jPtr) {
+				jPtr->appendValue(this->_obj_, name, nullptr);
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		template <> bool Json::addSubitem(const QString& name, const Json& value) {
+			jPtr = getJsonProcFunc();
+			if (jPtr) {
+
+				jPtr->addValueJson(this->_obj_, name, value.toString());
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+#endif // __WIN__
+
+		bool addSubitem(std::initializer_list<Json> values) {
+			if (this->type == Type::Array) {
+				for (Json al : values)
+				{
+					this->extendItem(al);
+				}
+				return true;
+			}
+			else
+				return false;
+		}
+
 		Json() : Json(JsonType::Object) {}
 
 		Json(JsonType type) : type((Type)type), jPtr(nullptr) {
 			_obj_ = new QJsonDocument;
 		}
 
-		explicit Json(std::nullptr_t) {
+		Json(std::nullptr_t) {
 			new (this)Json();
 			this->type = Type::Null;
 		}
 
-		explicit Json(bool data) {
+		Json(bool data) {
 			new (this)Json();
 			this->type = data ? Type::True : Type::False;
 		}
@@ -157,6 +193,15 @@ namespace QJSON {
 			return rs;
 		}
 
+		QStringList getAllKeys() {
+			QStringList rs;
+			if (this->type == Type::Object) {
+				QJsonObject obj = this->_obj_->object();
+				return obj.keys();
+			}
+			return rs;
+		}
+
 		~Json() {
 			if (_obj_)
 				delete _obj_;
@@ -245,28 +290,58 @@ namespace QJSON {
 			return ct;
 		}
 
+		void extendItem(Json cur, QString name = QString("")) {
+			switch (cur.type)
+			{
+			case Type::False:
+				this->addSubitem(name, false);
+				break;
+			case Type::True:
+				this->addSubitem(name, true);
+				break;
+			case Type::Null:
+				this->addSubitem(name, nullptr);
+				break;
+			case Type::Number:
+				this->addSubitem(name, cur.vdata.toDouble());
+				break;
+			case Type::String:
+				this->addSubitem(name, cur.vdata);
+				break;
+			case Type::Object:
+			case Type::Array:
+				this->addSubitem(name, cur);
+			default:
+				break;
+			}
+		}
+
+#ifdef __LINUX__
+		template <> bool Json::addSubitem(const QString& name, const std::nullptr_t&) {
+			jPtr = getJsonProcFunc();
+			if (jPtr) {
+				jPtr->appendValue(this->_obj_, name, nullptr);
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		template <> bool Json::addSubitem(const QString& name, const Json& value) {
+			jPtr = getJsonProcFunc();
+			if (jPtr) {
+
+				jPtr->addValueJson(this->_obj_, name, value.toString());
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+#endif // __LINUX__
+
 	};
 
-	template <> bool Json::addSubitem(const QString& name, const std::nullptr_t&) {
-		jPtr = getJsonProcFunc();
-		if (jPtr) {
-			jPtr->appendValue(this->_obj_, name, nullptr);
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	template <> bool Json::addSubitem(const QString& name, const Json& value) {
-		jPtr = getJsonProcFunc();
-		if (jPtr) {
 
-			jPtr->addValueJson(this->_obj_, name, value.toString());
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
 
 }

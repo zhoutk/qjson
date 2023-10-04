@@ -7,12 +7,12 @@ using namespace QJSON;
 
 int main(int argc, char* argv[])
 {
-	Json rs(JsonType::Object);
+	Json rs(JsonType::Array);
 	Json a = Json("{\"a\":\"abc\"}");
 	Json one(JsonType::Object);
 	one.addSubitem("中文", "中文测试");
 
-	rs.addSubitem("first of one", one);
+	//rs.addSubitem("first of one", one);
 
 	one.addSubitem("null", nullptr);
 	one.addSubitem("num0", 0);
@@ -23,12 +23,11 @@ int main(int argc, char* argv[])
 	one.addSubitem("boolT", true);
 	one.addSubitem("first", "number one");
 
-	rs.addSubitem("a object", a);
-	rs.addSubitem("all of one", one);
+	rs.addSubitem({"a object", false, nullptr, 11.90000018, true, a});
 
 	QString key = "num1";
-	qDebug() << one.getAndRemove(key).toString();
-	qDebug() << "  ---  " << one.toString();
+	qDebug() << rs.toString();
+	//qDebug() << "  ---  " << one.toString();
 
 	getchar();
 	// Json sub(JsonType::Array);
