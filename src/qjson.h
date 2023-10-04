@@ -266,34 +266,7 @@ namespace QJSON {
 			return ct;
 		}
 
-		void extendItem(Json cur, QString name = QString("")) {
-			switch (cur.type)
-			{
-			case Type::False:
-				this->addSubitem(name, false);
-				break;
-			case Type::True:
-				this->addSubitem(name, true);
-				break;
-			case Type::Null:
-				jPtr = getJsonProcFunc();
-				jPtr->appendValue(this->_obj_, name, nullptr);
-				break;
-			case Type::Number:
-				this->addSubitem(name, cur.vdata.toDouble());
-				break;
-			case Type::String:
-				this->addSubitem(name, cur.vdata);
-				break;
-			case Type::Object:
-			case Type::Array:
-				jPtr = getJsonProcFunc();
-				jPtr->addValueJson(this->_obj_, name, cur.toString());
-				break;
-			default:
-				break;
-			}
-		}
+		void extendItem(Json cur, QString name = QString(""));
 
 	};
 
@@ -316,6 +289,33 @@ namespace QJSON {
 		}
 		else {
 			return false;
+		}
+	}
+
+	void Json::extendItem(Json cur, QString name) {
+		switch (cur.type)
+		{
+		case Type::False:
+			this->addSubitem(name, false);
+			break;
+		case Type::True:
+			this->addSubitem(name, true);
+			break;
+		case Type::Null:
+			this->addSubitem(name, nullptr);
+			break;
+		case Type::Number:
+			this->addSubitem(name, cur.vdata.toDouble());
+			break;
+		case Type::String:
+			this->addSubitem(name, cur.vdata);
+			break;
+		case Type::Object:
+		case Type::Array:
+			this->addSubitem(name, cur);
+			break;
+		default:
+			break;
 		}
 	}
 
