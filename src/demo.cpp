@@ -8,7 +8,7 @@ using namespace QJSON;
 int main(int argc, char* argv[])
 {
 	Json rs(JsonType::Array);
-	Json a = Json("{\"a\":\"abc\"}");
+	Json a = Json("[\"a\",\"abc\"]");
 	Json one(JsonType::Object);
 	one.addSubitem("中文", "中文测试");
 
@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
 	one.addSubitem("first", "number one");
 
 	rs.addSubitem({"a object", false, nullptr, 11.90000018, true, a});
+	rs.concat(a);
 
 	QString key = "num1";
 	qDebug() << rs.toString();

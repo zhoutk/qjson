@@ -1,27 +1,42 @@
 #pragma once
 
-#include "proc.h"
+#include <QJsonDocument>
+#include <QString>
+#include <QDebug>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonParseError>
 
 namespace QJSON {
+	enum class JsonType
+	{
+		Object = 6,
+		Array = 7
+	};
 
 	class Json final {
 		public:
-		template <typename T> bool addSubitem(const QString& name, const T& value)
+		template <typename T> bool addSubitem(const QString& name, const T& value)  //object
 		{
-			jPtr = getJsonProcFunc();		//return nullptr but Object and Array
-			if (jPtr) {
-				QVariant data = value;
-				jPtr->appendValue(this->_obj_, name, &data);
-				return true;
+			if (this->type == Type::Object) {
+				QJsonObject json = this->_obj_->object();
+				if (json.contains(name))
+					json.remove(name);
+				json.insert(name, QJsonValue::fromVariant(value));
+				delete this->_obj_;
+				this->_obj_ = new QJsonDocument(json);
 			}
-			else {
+			else 
 				return false;
-			}
 		};
 
-		template<typename T> bool addSubitem(const T& value) {
-			if (this->type == Type::Array)
-				return addSubitem("", value);
+		template<typename T> bool addSubitem(const T& value) {			//Array
+			if (this->type == Type::Array) {
+				QJsonArray json = this->_obj_->array();
+				json.push_back(QJsonValue::fromVariant(value));
+				delete this->_obj_;
+				this->_obj_ = new QJsonDocument(json);
+			}
 			else
 				return false;
 		}
@@ -30,7 +45,7 @@ namespace QJSON {
 			if (this->type == Type::Array) {
 				for (Json al : values)
 				{
-					this->extendItem(al);
+					this->ExtendItem(al);
 				}
 				return true;
 			}
@@ -40,7 +55,7 @@ namespace QJSON {
 
 		Json() : Json(JsonType::Object) {}
 
-		Json(JsonType type) : type((Type)type), jPtr(nullptr) {
+		Json(JsonType type) : type((Type)type) {
 			_obj_ = new QJsonDocument;
 		}
 
@@ -178,6 +193,39 @@ namespace QJSON {
 			return rs;
 		}
 
+		bool concat(const Json& value) {
+			if (this->type == Type::Array) {
+				if (value.type == Type::Array) {
+					QJsonArray tarr = this->_obj_->array();
+					QJsonArray varr = value._obj_->array();
+					for (int i = 0; i < varr.size(); i++) 
+						tarr.push_back(varr[i]);
+					delete this->_obj_;
+					this->_obj_ = new QJsonDocument(tarr);
+				}
+				else if (value.type == Type::Object) {
+					QJsonArray tarr = this->_obj_->array();
+					QJsonObject obj = value._obj_->object();
+					QJsonObject::const_iterator it = obj.constBegin();
+					QJsonObject::const_iterator end = obj.constEnd();
+					while (it != end)
+					{
+						tarr.push_back(it.value());
+						it++;
+					}
+					delete this->_obj_;
+					this->_obj_ = new QJsonDocument(tarr);
+				}
+				else {
+					this->ExtendItem(value);
+				}
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+
 		~Json() {
 			if (_obj_)
 				delete _obj_;
@@ -199,19 +247,6 @@ namespace QJSON {
 		QJsonDocument* _obj_;
 		QString vdata;
 
-		JsonProc* jPtr;
-		
-		JsonProc* getJsonProcFunc() {
-			if (this->type == Type::Object) {
-				return ObjectProc::Instance();
-			}
-			else if (this->type == Type::Array) {
-				return ArrayProc::Instance();
-			}
-			else {
-				return nullptr;
-			}
-		}
 
 		Json(Type type) {
 			new (this)Json();
@@ -266,33 +301,65 @@ namespace QJSON {
 			return ct;
 		}
 
-		void extendItem(Json cur, QString name = QString(""));
+		void ExtendItem(QString name, Json cur);
+		void ExtendItem(Json cur);
 
 	};
 
 	template <> bool Json::addSubitem(const QString& name, const std::nullptr_t&) {
-		jPtr = getJsonProcFunc();
-		if (jPtr) {
-			jPtr->appendValue(this->_obj_, name, nullptr);
-			return true;
+		if (this->type == Type::Object) {
+			QJsonObject json = this->_obj_->object();
+			if (json.contains(name))
+				json.remove(name);
+			json.insert(name, QJsonValue::Null);
+			delete this->_obj_;
+			this->_obj_ = new QJsonDocument(json);
 		}
-		else {
+		else 
 			return false;
-		}
 	}
 	template <> bool Json::addSubitem(const QString& name, const Json& value) {
-		jPtr = getJsonProcFunc();
-		if (jPtr) {
-
-			jPtr->addValueJson(this->_obj_, name, value.toString());
-			return true;
+		if (this->type == Type::Object) {
+			QJsonObject json = this->_obj_->object();
+			if (json.contains(name))
+				json.remove(name);
+			QJsonParseError json_error;
+			QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().toUtf8(), &json_error);
+			if (json_error.error == QJsonParseError::NoError) {
+				json.insert(name, QJsonValue::fromVariant(QVariant(jsonDocument)));
+			}
+			delete this->_obj_;
+			this->_obj_ = new QJsonDocument(json);
 		}
-		else {
+		else 
 			return false;
+	}
+	template <> bool Json::addSubitem(const std::nullptr_t&) {
+		if (this->type == Type::Array) {
+			QJsonArray json = this->_obj_->array();
+			json.push_back(QJsonValue::Null);
+			delete this->_obj_;
+			this->_obj_ = new QJsonDocument(json);
 		}
+		else
+			return false;
+	}
+	template <> bool Json::addSubitem(const Json& value) {
+		if (this->type == Type::Array) {
+			QJsonArray json = this->_obj_->array();
+			QJsonParseError json_error;
+			QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().toUtf8(), &json_error);
+			if (json_error.error == QJsonParseError::NoError) {
+				json.push_back(QJsonValue::fromVariant(QVariant(jsonDocument)));
+			}
+			delete this->_obj_;
+			this->_obj_ = new QJsonDocument(json);
+		}
+		else
+			return false;
 	}
 
-	void Json::extendItem(Json cur, QString name) {
+	void Json::ExtendItem(QString name, Json cur) {			//Object
 		switch (cur.type)
 		{
 		case Type::False:
@@ -313,6 +380,33 @@ namespace QJSON {
 		case Type::Object:
 		case Type::Array:
 			this->addSubitem(name, cur);
+			break;
+		default:
+			break;
+		}
+	}
+
+	void Json::ExtendItem(Json cur) {				//Array
+		switch (cur.type)
+		{
+		case Type::False:
+			this->addSubitem(false);
+			break;
+		case Type::True:
+			this->addSubitem(true);
+			break;
+		case Type::Null:
+			this->addSubitem(nullptr);
+			break;
+		case Type::Number:
+			this->addSubitem(cur.vdata.toDouble());
+			break;
+		case Type::String:
+			this->addSubitem(cur.vdata);
+			break;
+		case Type::Object:
+		case Type::Array:
+			this->addSubitem(cur);
 			break;
 		default:
 			break;
