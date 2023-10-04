@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 	rs.addSubitem("a object", a);
 	rs.addSubitem("all of one", one);
 
-	qDebug() << one[5].toString();
+	qDebug() << rs["all of one1"].toString();
 
 	getchar();
 	// Json sub(JsonType::Array);

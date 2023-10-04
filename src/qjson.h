@@ -117,10 +117,6 @@ namespace QJSON {
 			return rs;
 		}
 
-		bool addValueJson(const QString& name, const Json& obj){
-			return true;
-		}
-
 		QString toString() const {
 			switch (this->type)
 			{
@@ -134,8 +130,8 @@ namespace QJSON {
 				return "true";
 			case Type::False:
 				return "false";
-			case Type::Null:
-				return "null";
+		/*	case Type::Null:
+				return "null";*/
 			default:
 				return "";
 			}
@@ -250,7 +246,6 @@ namespace QJSON {
 		else {
 			return false;
 		}
-		//return addValueJson(name, value);
 	}
 
 }
