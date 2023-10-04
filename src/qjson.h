@@ -26,30 +26,6 @@ namespace QJSON {
 				return false;
 		}
 
-#ifdef __WIN__
-		template <> bool Json::addSubitem(const QString& name, const std::nullptr_t&) {
-			jPtr = getJsonProcFunc();
-			if (jPtr) {
-				jPtr->appendValue(this->_obj_, name, nullptr);
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		template <> bool Json::addSubitem(const QString& name, const Json& value) {
-			jPtr = getJsonProcFunc();
-			if (jPtr) {
-
-				jPtr->addValueJson(this->_obj_, name, value.toString());
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-#endif // __WIN__
-
 		bool addSubitem(std::initializer_list<Json> values) {
 			if (this->type == Type::Array) {
 				for (Json al : values)
@@ -300,7 +276,8 @@ namespace QJSON {
 				this->addSubitem(name, true);
 				break;
 			case Type::Null:
-				this->addSubitem(name, nullptr);
+				jPtr = getJsonProcFunc();
+				jPtr->appendValue(this->_obj_, name, nullptr);
 				break;
 			case Type::Number:
 				this->addSubitem(name, cur.vdata.toDouble());
@@ -310,38 +287,36 @@ namespace QJSON {
 				break;
 			case Type::Object:
 			case Type::Array:
-				this->addSubitem(name, cur);
+				jPtr = getJsonProcFunc();
+				jPtr->addValueJson(this->_obj_, name, cur.toString());
+				break;
 			default:
 				break;
 			}
 		}
 
-#ifdef __LINUX__
-		template <> bool Json::addSubitem(const QString& name, const std::nullptr_t&) {
-			jPtr = getJsonProcFunc();
-			if (jPtr) {
-				jPtr->appendValue(this->_obj_, name, nullptr);
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		template <> bool Json::addSubitem(const QString& name, const Json& value) {
-			jPtr = getJsonProcFunc();
-			if (jPtr) {
-
-				jPtr->addValueJson(this->_obj_, name, value.toString());
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-#endif // __LINUX__
-
 	};
 
+	template <> bool Json::addSubitem(const QString& name, const std::nullptr_t&) {
+		jPtr = getJsonProcFunc();
+		if (jPtr) {
+			jPtr->appendValue(this->_obj_, name, nullptr);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	template <> bool Json::addSubitem(const QString& name, const Json& value) {
+		jPtr = getJsonProcFunc();
+		if (jPtr) {
 
+			jPtr->addValueJson(this->_obj_, name, value.toString());
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
 }
