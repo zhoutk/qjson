@@ -62,6 +62,22 @@ namespace QJSON {
 			this->type = data ? Type::True : Type::False;
 		}
 
+		Json(char data) {
+			new (this)Json((int)data);
+		}
+
+		Json(int data) {
+			new (this)Json((double)data);
+		}
+
+		Json(long data) {
+			new (this)Json((double)data);
+		}
+
+		Json(float data) {
+			new (this)Json((double)data);
+		}
+
 		Json(double data) {
 			new (this)Json();
 			this->type = Type::Number;
@@ -93,6 +109,8 @@ namespace QJSON {
 				vdata = data;
 			}
 		}
+
+		Json(std::initializer_list<std::pair<const std::string, Json>> values);
 
 		Json(const Json& origin) {
 			this->type = origin.type;
@@ -602,6 +620,13 @@ namespace QJSON {
 			}
 		}
 		return *this;
+	}
+
+	Json::Json(std::initializer_list<std::pair<const std::string, Json>> values) {
+		new (this)Json();
+		for (std::pair<const std::string, Json> al : values) {
+			this->add(QString::fromStdString(al.first), al.second);
+		}
 	}
 
 	Json& Json::push_back(const Json& value) {

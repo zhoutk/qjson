@@ -7,21 +7,22 @@ using namespace QJSON;
 
 int main(int argc, char* argv[])
 {
-	Json rs(JsonType::Array);
-	Json a = Json("[\"a\",\"abc\"]");
-	Json one(JsonType::Array);
-	one.add("32624u7248367");
+	//Json rs(JsonType::Object);
+	//Json a = Json("[\"a\",\"abc\"]");
+	//Json one(JsonType::Array);
+	//one.add("32624u7248367");
 
-	//rs.add("first of one", one);
+	////rs.add("first of one", one);
 
-	one.add(nullptr).add(0).add(123);
-	one.insert(0, 11.1).add("double", 211.654321).add("boolF", false);
-	one.add("boolT", true).insert(1, "number one");
+	//one.add(nullptr).add(0).add(123);
+	//one.insert(0, 11.1).add("double", 211.654321).add("boolF", false);
+	//one.add("boolT", true).insert(1, "number one");
 
-	rs.add({"a object", false, nullptr, 11.90000018, true}).add(a).push_back(a).insert(4, Json("next value"));
-
-	QString key = "num1";
-	qDebug() << one.toString();
+	//rs.add({"a object", false, nullptr, 11.90000018, true}).add(a).push_back(a).insert(4, Json("next value"));
+	Json subObject { {"math", 99}, { "str", "a string." } };
+	Json mulitListObj{ {"fkey", false},{"strkey","ffffff"},{"num2", 9.98}, {"okey", subObject} };
+	qDebug() << mulitListObj.toString();
+	//QString key = "num1";
 	//qDebug() << "  ---  " << one.toString();
 
 	getchar();
