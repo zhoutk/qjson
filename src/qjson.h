@@ -114,7 +114,7 @@ namespace QJSON {
 			}
 		}
 
-		Json(std::initializer_list<std::pair<const std::string, Json>> values);
+		Json(std::initializer_list<QPair<const QString, Json>> values);
 
 		Json(const Json& origin) {
 			this->type = origin.type;
@@ -626,10 +626,10 @@ namespace QJSON {
 		return *this;
 	}
 
-	Json::Json(std::initializer_list<std::pair<const std::string, Json>> values) {
+	Json::Json(std::initializer_list<QPair<const QString, Json>> values) {
 		new (this)Json();
-		for (std::pair<const std::string, Json> al : values) {
-			this->add(QString::fromStdString(al.first), al.second);
+		for (QPair<const QString, Json> al : values) {
+			this->add(al.first, al.second);
 		}
 	}
 
