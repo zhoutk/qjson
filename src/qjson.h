@@ -74,6 +74,10 @@ namespace QJSON {
 			new (this)Json((double)data);
 		}
 
+		Json(long long data) {
+			new (this)Json((double)data);
+		}
+
 		Json(float data) {
 			new (this)Json((double)data);
 		}

@@ -36,7 +36,7 @@
         {
             "name": "linux-base",
             "displayName": "Linux Debug",
-            "description": "远程 Linux 系统。",
+            "description": "Linux Debug",
             "hidden": true,
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
@@ -58,7 +58,7 @@
         {
             "name": "linux-debug",
             "displayName": "Linux",
-            "description": "Linux (64 位)(Debug)",
+            "description": "Linux (64)(Debug)",
             "inherits": "linux-base",
             "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
         }
