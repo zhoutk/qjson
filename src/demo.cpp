@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 	one.add("float", 11.1).add("double", 211.654321).add("boolF", false);
 	one.add("boolT", true).add("first", "number one");
 
-	rs.add({"a object", false, nullptr, 11.90000018, true, a}).concat(a);
+	rs.add({"a object", false, nullptr, 11.90000018, true}).push_back(a).insert(4, Json("next value"));
 
 	QString key = "num1";
 	qDebug() << rs.toString();

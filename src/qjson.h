@@ -111,6 +111,20 @@ namespace QJSON {
 			return *(new (this)Json(origin));
 		}
 
+		bool operator != (const Json& right) {
+			return
+				this->type != right.type ||
+				this->_obj_ != right._obj_ ||
+				this->vdata.compare(right.vdata) != 0;
+		}
+
+		bool operator == (const Json& right) {
+			return
+				this->type == right.type &&
+				this->_obj_ == right._obj_ &&
+				this->vdata.compare(right.vdata) == 0;
+		}
+
 		Json& operator = (Json&& rhs) {
 			return *(new (this)Json(std::move(rhs)));
 		}
@@ -186,6 +200,25 @@ namespace QJSON {
 			return rs;
 		}
 
+		Json& extend(const Json& value) {
+			if (this->type == Type::Object) {
+				if (value.type == Type::Object) {
+					QJsonObject tobj = this->_obj_->object();
+					QJsonObject obj = value._obj_->object();
+					QJsonObject::const_iterator it = obj.constBegin();
+					QJsonObject::const_iterator end = obj.constEnd();
+					while (it != end)
+					{
+						tobj.insert(it.key(), it.value());
+						it++;
+					}
+					delete this->_obj_;
+					this->_obj_ = new QJsonDocument(tobj);
+				}
+			}
+			return *this;
+		}
+
 		Json& concat(const Json& value) {
 			if (this->type == Type::Array) {
 				if (value.type == Type::Array) {
@@ -214,6 +247,42 @@ namespace QJSON {
 				}
 			}
 			return *this;
+		}
+
+		Json& push_back(const Json& value);
+
+		Json& push_front(const Json& value) {
+			if (this->type == Type::Array)
+				return this->insert(0, value);
+			return *this;
+		}
+
+		Json& insert(const int& index, const Json& value) {
+			if (this->type == Type::Array && index < this->size()) {
+				QJsonArray arr = this->_obj_->array();
+				if (value.type == Type::Array || value.type == Object) {
+					QJsonParseError json_error;
+					QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().toUtf8(), &json_error);
+					if (json_error.error == QJsonParseError::NoError) {
+						arr.insert(index, QJsonValue::fromVariant(QVariant(jsonDocument)));
+					}
+				}
+				else {
+					QString v = value.toString();
+					if(!v.isEmpty())
+						arr.insert(index, v);
+				}
+				delete this->_obj_;
+				this->_obj_ = new QJsonDocument(arr);
+			}
+			return *this;
+		}
+
+		int size() {
+			if (this->type == Type::Array) 
+				return this->_obj_->array().size();
+			else
+				return 0;
 		}
 
 		~Json() {
@@ -342,6 +411,12 @@ namespace QJSON {
 			delete this->_obj_;
 			this->_obj_ = new QJsonDocument(json);
 		}
+		return *this;
+	}
+
+	Json& Json::push_back(const Json& value) {
+		if (this->type == Type::Array)
+			return this->add(value);
 		return *this;
 	}
 
