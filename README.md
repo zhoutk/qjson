@@ -4,7 +4,7 @@
 From node.Js back to c++. I especially miss the pleasure of using json in javascript, so try to diy one. I used many libraries, such as: rapidjson, cJson, CJsonObject, drleq cppjson, json11, etc. Zjson's data structure is greatly inspired by cJOSN. The parsing part refers to json11, thanks! Finally, because data storage needs not only to distinguish values, but also to know their types. I choose std:: variant and std:: any which supported by C++17. Finally, the C++ version is fixed at C++17. This library is designed as a single header file, not relying on any other lib than the C++ standard library.
 
 ## Design ideas  
-Simple interface functions, simple use methods, flexible data structures, and support chain operations as much as possible. Realizing the simplest design using template technology. Adding a child object of Json only needs one function -- addSubitem, which automatically identifies whether it is a value or a child Json object. The Json object is stored in a linked list structure (refers to cJSON). Please see my data structure design as follows. The header and the following nodes use the same structure, which enables chained operations during index operations ([]).
+Simple interface functions, simple use methods, flexible data structures, and support chain operations as much as possible. Realizing the simplest design using template technology. Adding a child object of Json only needs one function -- add, which automatically identifies whether it is a value or a child Json object. The Json object is stored in a linked list structure (refers to cJSON). Please see my data structure design as follows. The header and the following nodes use the same structure, which enables chained operations during index operations ([]).
 
 ## Project progress
 At present, the project has completed most of functions. Please refer to the task list for details. 
@@ -22,7 +22,7 @@ task list：
 - [x] getValueType
 - [x] getAndRemove
 - [x] getAllKeys
-- [x] addSubitem（add subitems & add items to array rapidly）
+- [x] add（add subitems & add items to array rapidly）
 - [x] toString(generate josn string)
 - [x] toInt、toDouble、toFalse
 - [x] toVector
@@ -86,8 +86,8 @@ Api list
 - Json& operator = (Json&& origin)&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;
 - Json operator[](const int& index)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 - Json operator[](const string& key)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;
-- template&lt;typename T&gt; bool addSubitem(T value)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-- template&lt;typename T&gt; bool addSubitem(string name, T value)  //add a subitem
+- template&lt;typename T&gt; bool add(T value)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+- template&lt;typename T&gt; bool add(string name, T value)  //add a subitem
 - string toString()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;
 - bool isError()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 - bool isNull()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;
@@ -118,27 +118,27 @@ Api list
     Json subObject{{"math", 99},{"str", "a string."}};   
     Json mulitListObj{{"fkey", false},{"strkey","ffffff"},{"num2", 9.98}, {"okey", subObject}};
     Json subArray(JsonType::Array);                 
-    subArray.addSubitem({12,13,14,15});            
+    subArray.add({12,13,14,15});            
 
     Json ajson(JsonType::Object);                
     std::string data = "kevin";                     
-    ajson.addSubitem("fail", false);             
-    ajson.addSubitem("name", data);              
-    ajson.addSubitem("school-en", "the 85th.");   
-    ajson.addSubitem("age", 10);                  
-    ajson.addSubitem("scores", 95.98);            
-    ajson.addSubitem("nullkey", nullptr);         
+    ajson.add("fail", false);             
+    ajson.add("name", data);              
+    ajson.add("school-en", "the 85th.");   
+    ajson.add("age", 10);                  
+    ajson.add("scores", 95.98);            
+    ajson.add("nullkey", nullptr);         
 
     Json sub;                                  
-    sub.addSubitem("math", 99);                 
+    sub.add("math", 99);                 
     ajson.addValueJson("subJson", sub);           
 
     Json subArray(JsonType::Array);              
-    subArray.addSubitem("I'm the first one.");   
-    subArray.addSubitem("two", 2);               
+    subArray.add("I'm the first one.");   
+    subArray.add("two", 2);               
     
     Json sub2;                            
-    sub2.addSubitem("sb2", 222);
+    sub2.add("sb2", 222);
 
     subArray.addValueJson("subObj", sub2);         
     

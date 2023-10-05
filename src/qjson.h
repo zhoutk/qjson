@@ -16,7 +16,7 @@ namespace QJSON {
 
 	class Json final {
 		public:
-		template <typename T> bool addSubitem(const QString& name, const T& value)  //object
+		template <typename T> Json& add(const QString& name, const T& value)  //object
 		{
 			if (this->type == Type::Object) {
 				QJsonObject json = this->_obj_->object();
@@ -26,31 +26,24 @@ namespace QJSON {
 				delete this->_obj_;
 				this->_obj_ = new QJsonDocument(json);
 			}
-			else 
-				return false;
+			return *this;
 		};
 
-		template<typename T> bool addSubitem(const T& value) {			//Array
+		template<typename T> Json& add(const T& value) {			//Array
 			if (this->type == Type::Array) {
 				QJsonArray json = this->_obj_->array();
 				json.push_back(QJsonValue::fromVariant(value));
 				delete this->_obj_;
 				this->_obj_ = new QJsonDocument(json);
 			}
-			else
-				return false;
+			return *this;
 		}
 
-		bool addSubitem(std::initializer_list<Json> values) {
-			if (this->type == Type::Array) {
-				for (Json al : values)
-				{
+		Json& add(std::initializer_list<Json> values) {
+			if (this->type == Type::Array) 
+				for (const Json& al : values)
 					this->ExtendItem(al);
-				}
-				return true;
-			}
-			else
-				return false;
+			return *this;
 		}
 
 		Json() : Json(JsonType::Object) {}
@@ -193,7 +186,7 @@ namespace QJSON {
 			return rs;
 		}
 
-		bool concat(const Json& value) {
+		Json& concat(const Json& value) {
 			if (this->type == Type::Array) {
 				if (value.type == Type::Array) {
 					QJsonArray tarr = this->_obj_->array();
@@ -219,11 +212,8 @@ namespace QJSON {
 				else {
 					this->ExtendItem(value);
 				}
-				return true;
 			}
-			else {
-				return false;
-			}
+			return *this;
 		}
 
 		~Json() {
@@ -301,12 +291,12 @@ namespace QJSON {
 			return ct;
 		}
 
-		void ExtendItem(QString name, Json cur);
-		void ExtendItem(Json cur);
+		void ExtendItem(const QString& name, const Json& cur);
+		void ExtendItem(const Json& cur);
 
 	};
 
-	template <> bool Json::addSubitem(const QString& name, const std::nullptr_t&) {
+	template <> Json& Json::add(const QString& name, const std::nullptr_t&) {
 		if (this->type == Type::Object) {
 			QJsonObject json = this->_obj_->object();
 			if (json.contains(name))
@@ -315,10 +305,9 @@ namespace QJSON {
 			delete this->_obj_;
 			this->_obj_ = new QJsonDocument(json);
 		}
-		else 
-			return false;
+		return *this;
 	}
-	template <> bool Json::addSubitem(const QString& name, const Json& value) {
+	template <> Json& Json::add(const QString& name, const Json& value) {
 		if (this->type == Type::Object) {
 			QJsonObject json = this->_obj_->object();
 			if (json.contains(name))
@@ -331,20 +320,18 @@ namespace QJSON {
 			delete this->_obj_;
 			this->_obj_ = new QJsonDocument(json);
 		}
-		else 
-			return false;
+		return *this;
 	}
-	template <> bool Json::addSubitem(const std::nullptr_t&) {
+	template <> Json& Json::add(const std::nullptr_t&) {
 		if (this->type == Type::Array) {
 			QJsonArray json = this->_obj_->array();
 			json.push_back(QJsonValue::Null);
 			delete this->_obj_;
 			this->_obj_ = new QJsonDocument(json);
 		}
-		else
-			return false;
+		return *this;
 	}
-	template <> bool Json::addSubitem(const Json& value) {
+	template <> Json& Json::add(const Json& value) {
 		if (this->type == Type::Array) {
 			QJsonArray json = this->_obj_->array();
 			QJsonParseError json_error;
@@ -355,58 +342,57 @@ namespace QJSON {
 			delete this->_obj_;
 			this->_obj_ = new QJsonDocument(json);
 		}
-		else
-			return false;
+		return *this;
 	}
 
-	void Json::ExtendItem(QString name, Json cur) {			//Object
+	void Json::ExtendItem(const QString& name, const Json& cur) {			//Object
 		switch (cur.type)
 		{
 		case Type::False:
-			this->addSubitem(name, false);
+			this->add(name, false);
 			break;
 		case Type::True:
-			this->addSubitem(name, true);
+			this->add(name, true);
 			break;
 		case Type::Null:
-			this->addSubitem(name, nullptr);
+			this->add(name, nullptr);
 			break;
 		case Type::Number:
-			this->addSubitem(name, cur.vdata.toDouble());
+			this->add(name, cur.vdata.toDouble());
 			break;
 		case Type::String:
-			this->addSubitem(name, cur.vdata);
+			this->add(name, cur.vdata);
 			break;
 		case Type::Object:
 		case Type::Array:
-			this->addSubitem(name, cur);
+			this->add(name, cur);
 			break;
 		default:
 			break;
 		}
 	}
 
-	void Json::ExtendItem(Json cur) {				//Array
+	void Json::ExtendItem(const Json& cur) {				//Array
 		switch (cur.type)
 		{
 		case Type::False:
-			this->addSubitem(false);
+			this->add(false);
 			break;
 		case Type::True:
-			this->addSubitem(true);
+			this->add(true);
 			break;
 		case Type::Null:
-			this->addSubitem(nullptr);
+			this->add(nullptr);
 			break;
 		case Type::Number:
-			this->addSubitem(cur.vdata.toDouble());
+			this->add(cur.vdata.toDouble());
 			break;
 		case Type::String:
-			this->addSubitem(cur.vdata);
+			this->add(cur.vdata);
 			break;
 		case Type::Object:
 		case Type::Array:
-			this->addSubitem(cur);
+			this->add(cur);
 			break;
 		default:
 			break;

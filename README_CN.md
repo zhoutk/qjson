@@ -7,7 +7,7 @@
 本人姓名拼音第一个字母z加上json，即得本项目名称zjson，没有其它任何意义。我将编写一系列以z开头的相关项目，命名是个很麻烦的事，因此采用了这种简单粗暴的方式。
 
 ## 设计思路 
-简单的接口函数、简单的使用方法、灵活的数据结构、尽量支持链式操作。使用模板技术，得以完成最简设计，为Json对象子对象的方法只需一个 ———— addSubitem，该方法自动识别是值对象还是子Json对象。采用链表结构（向cJSON致敬）来存储Json对象，请看我下面的数据结构设计，表头与后面的结点，都用使用一致的结构，这使得在索引操作([])时，可以进行链式操作。
+简单的接口函数、简单的使用方法、灵活的数据结构、尽量支持链式操作。使用模板技术，得以完成最简设计，为Json对象子对象的方法只需一个 ———— add，该方法自动识别是值对象还是子Json对象。采用链表结构（向cJSON致敬）来存储Json对象，请看我下面的数据结构设计，表头与后面的结点，都用使用一致的结构，这使得在索引操作([])时，可以进行链式操作。
 
 ## 项目进度
 项目目前完成大部分主要功能，具体情况请看任务列表。可以新建Json对象，增加数据，按key(Object类型)或索引(Array类型)提取相应的值或子对象，生成json字符串，并且实现从json字符串构造Json对象。  
@@ -26,7 +26,7 @@
 - [x] getValueType
 - [x] getAndRemove
 - [x] getAllKeys
-- [x] addSubitem（为Json对象增加子对象，为数组快速增加元素）
+- [x] add（为Json对象增加子对象，为数组快速增加元素）
 - [x] toString(生成json字符串)
 - [x] toInt、toDouble、toFalse 等值类型转换
 - [x] toVector 数组类型转换
@@ -90,8 +90,8 @@ enum class JsonType
 - Json& operator = (Json&& rhs)&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;//移动赋值操作
 - Json operator[](const int& index)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;//Json数组对象元素查询
 - Json operator[](const string& key)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;//Json Object 对象按key查询
-- template&lt;typename T&gt; bool addSubitem(T value)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;//增加值对象类型，只面向Array
-- template&lt;typename T&gt; bool addSubitem(string name, T value)  //增加值对象类型，当this为Array时，name会被忽略
+- template&lt;typename T&gt; bool add(T value)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;//增加值对象类型，只面向Array
+- template&lt;typename T&gt; bool add(string name, T value)  //增加值对象类型，当this为Array时，name会被忽略
 - string toString()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;//Json对象序列化为字符串
 - bool isError()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;//无效Json对象判定
 - bool isNull()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;//null值判定
@@ -126,27 +126,27 @@ enum class JsonType
 	Json mulitListObj{{"fkey", false},{"strkey","ffffff"},{"num2", 9.98}, {"okey", subObject}};
 
     Json subArray(JsonType::Array);                 //数组对象以initializer_list方式增加元素
-	subArray.addSubitem({12,13,14,15});             //快速生成 [12,13,14,15] array json
+	subArray.add({12,13,14,15});             //快速生成 [12,13,14,15] array json
 
     Json ajson(JsonType::Object);                   //新建Object对象，输入参数可以省略
     std::string data = "kevin";                     
-    ajson.addSubitem("fail", false);              //增加false值对象
-    ajson.addSubitem("name", data);               //增加字符串值对象
-    ajson.addSubitem("school-en", "the 85th.");   
-    ajson.addSubitem("age", 10);                  //增加number值对象，此处为整数
-    ajson.addSubitem("scores", 95.98);            //增加number值对象，此处为浮点数，还支持long,long long
-    ajson.addSubitem("nullkey", nullptr);         //增加null值对象，需要送入nullptr， NULL会被认为是整数0
+    ajson.add("fail", false);              //增加false值对象
+    ajson.add("name", data);               //增加字符串值对象
+    ajson.add("school-en", "the 85th.");   
+    ajson.add("age", 10);                  //增加number值对象，此处为整数
+    ajson.add("scores", 95.98);            //增加number值对象，此处为浮点数，还支持long,long long
+    ajson.add("nullkey", nullptr);         //增加null值对象，需要送入nullptr， NULL会被认为是整数0
 
     Json sub;                                       //新建Object对象
-    sub.addSubitem("math", 99);                 
+    sub.add("math", 99);                 
     ajson.addValueJson("subJson", sub);             //为ajson增加子Json类型对象，完成嵌套需要
 
     Json subArray(JsonType::Array);                 //新建Array对象，输入参数不可省略
-    subArray.addSubitem("I'm the first one.");    //增加Array对象的字符串值子对象
-    subArray.addSubitem("two", 2);                //增加Array对象的number值子对象，第一个参数会被忽略
+    subArray.add("I'm the first one.");    //增加Array对象的字符串值子对象
+    subArray.add("two", 2);                //增加Array对象的number值子对象，第一个参数会被忽略
     
     Json sub2;                            
-    sub2.addSubitem("sb2", 222);
+    sub2.add("sb2", 222);
 
     subArray.addValueJson("subObj", sub2);          //为Array对象增加Object类子对象，完成嵌套需求
     
