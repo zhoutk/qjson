@@ -180,15 +180,41 @@ namespace QJSON {
 			return TYPENAMES[this->type];
 		}
 
-		Json getAndRemove(const QString& key) {
-			Json rs = (*this)[key];
-			if ((rs.type != Type::Null && rs.type != Type::Error)) {
-				QJsonObject obj = this->_obj_->object();
-				obj.remove(key);
-				delete this->_obj_;
-				this->_obj_ = new QJsonDocument(obj);
+		Json take(const QString& key) {		//get and remove of Object
+			if (this->type == Type::Object) {
+				Json rs = (*this)[key];
+				if ((rs.type != Type::Null && rs.type != Type::Error)) 
+					(*this).remove(key);
+				return rs;
+			}else
+				return Json(Type::Error);
+		}
+
+		Json take(const int& index) {		//get and remove of Array
+			if (this->type == Type::Array) {
+				Json rs(Type::Error);
+				if (index >= 0 && index < this->size()) {
+					rs = (*this)[index];
+					(*this).remove(index);
+				}
+				return rs;
 			}
-			return rs;
+			else
+				return Json(Type::Error);
+		}
+
+		Json first() {
+			if (this->type == Type::Array && this->size() > 0)
+				return (*this)[0];
+			else
+				return Json(Type::Error);
+		}
+
+		Json last() {
+			if (this->type == Type::Array && this->size() > 0)
+				return (*this)[this->size() - 1];
+			else
+				return Json(Type::Error);
 		}
 
 		QStringList getAllKeys() {
@@ -250,10 +276,28 @@ namespace QJSON {
 		}
 
 		Json& push_back(const Json& value);
+		inline Json& push(const Json& value) {
+			return this->push_back(value);
+		}
 
 		Json& push_front(const Json& value) {
 			if (this->type == Type::Array)
 				return this->insert(0, value);
+			return *this;
+		}
+
+		Json& pop_back() {
+			if (this->type == Type::Array)
+				this->removeLast();
+			return *this;
+		}
+		inline Json& pop() {
+			return this->pop_back();
+		}
+
+		Json& pop_front() {
+			if (this->type == Type::Array)
+				return this->removeFirst();
 			return *this;
 		}
 
@@ -283,6 +327,116 @@ namespace QJSON {
 				return this->_obj_->array().size();
 			else
 				return 0;
+		}
+
+		bool isError() {
+			return this->type == Type::Error;
+		}
+
+		bool isNull() {
+			return this->type == Type::Null;
+		}
+
+		bool isObject() {
+			return this->type == Type::Object;
+		}
+
+		bool isArray() {
+			return this->type == Type::Array;
+		}
+
+		bool isNumber() {
+			return this->type == Type::Number;
+		}
+
+		bool isTrue() {
+			return this->type == Type::True;
+		}
+
+		bool isFalse() {
+			return this->type == Type::False;
+		}
+
+		bool isString() {
+			return this->type == Type::String;
+		}
+
+		bool isEmpty() {
+			return this->size() <= 0;
+		}
+
+		float toFloat() {
+			return (float)this->toDouble();
+		}
+
+		int toInt() {
+			return (int)this->toDouble();
+		}
+
+		double toDouble() {
+			return this->vdata.toDouble();
+		}
+
+		bool toBool() {
+			if (this->type == Type::True)
+				return true;
+			else
+				return false;
+		}
+
+		QVector<Json> toVector() {
+			QVector<Json> rs;
+			if (this->type == Type::Array) 
+				for (int i = 0; i < this->size(); i++)
+					rs.push_back((*this)[i]);
+			return rs;
+		}
+
+		Json& clear() {
+			if (this->type == Type::Array || this->type == Type::Object) {
+				delete this->_obj_;
+				this->_obj_ = new QJsonDocument;
+			}
+			else
+				this->vdata.clear();
+			return *this;
+		}
+
+		Json& remove(const QString& name) {
+			if (this->type == Type::Object) {
+				QJsonObject json = this->_obj_->object();
+				if (json.contains(name))
+					json.remove(name);
+				delete this->_obj_;
+				this->_obj_ = new QJsonDocument(json);
+			}
+			return *this;
+		}
+
+		Json& remove(const int& index) {
+			if (this->type == Type::Array) {
+				if (index >= 0 && index < this->size()) {
+					QJsonArray json = this->_obj_->array();
+					json.removeAt(index);
+					delete this->_obj_;
+					this->_obj_ = new QJsonDocument(json);
+				}
+			}
+			return *this;
+		}
+
+		Json& removeFirst() {
+			if (this->type == Type::Array) {
+				this->remove(0);
+			}
+			return *this;
+		}
+
+		Json& removeLast() {
+			if (this->type == Type::Array) {
+				this->remove(this->size() - 1);
+			}
+			return *this;
 		}
 
 		~Json() {
