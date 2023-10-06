@@ -88,21 +88,17 @@ namespace QJSON {
 			vdata = QString::number(data, 'f', getDecimalCount(data));
 		}
 
+		Json(const char* data) {
+			new (this)Json(std::string(data));
+		}
+
 		Json(std::string data) {
-			new (this)Json(QByteArray(data.c_str()));
+			new (this)Json(QString::fromStdString(data));
 		}
 
 		Json(QString data) {
-			new (this)Json(QByteArray(data.toUtf8()));
-		}
-
-		Json(const char* data) {
-			new (this)Json(QByteArray(data));
-		}
-
-		Json(QByteArray data) {
 			QJsonParseError json_error;
-			QJsonDocument* jsonDocument = new QJsonDocument(QJsonDocument::fromJson(data, &json_error));
+			QJsonDocument* jsonDocument = new QJsonDocument(QJsonDocument::fromJson(data.toUtf8(), &json_error));
 			if (json_error.error == QJsonParseError::NoError) {
 				_obj_ = jsonDocument;
 				this->type = jsonDocument->isObject() ? Type::Object : Type::Array;
@@ -543,6 +539,8 @@ namespace QJSON {
 				rs._obj_ = new QJsonDocument();
 				break;
 			default:
+				rs.type = Type::Error;
+				rs._obj_ = new QJsonDocument();
 				break;
 			}
 		}

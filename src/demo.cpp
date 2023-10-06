@@ -20,7 +20,14 @@ int main(int argc, char* argv[])
 
 	//rs.add({"a object", false, nullptr, 11.90000018, true}).add(a).push_back(a).insert(4, Json("next value"));
 	Json subObject { {"math", 99}, { "str", "a string." } };
-	Json mulitListObj{ {"fkey", false},{"strkey","ffffff"},{"num2", 9.98}, {"okey", subObject} };
+	Json mulitListObj{ 
+		{"fkey", false},
+		{"nullkey", nullptr},
+		{"strkey","ffffff"},
+		{"num1", 5},
+		{"num2", 9.98},
+		{"array", "not support"},
+		{"okey", subObject} };
 	qDebug() << mulitListObj.toString();
 	//QString key = "num1";
 	//qDebug() << "  ---  " << one.toString();
