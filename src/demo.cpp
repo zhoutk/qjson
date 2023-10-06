@@ -27,6 +27,7 @@ int main(int argc, char* argv[])
 		{"num1", 5},
 		{"num2", 9.98},
 		{"array", "not support"},
+		{"objStr", "{\"first\":\"one\",\"second\":\"two\"}"},
 		{"okey", subObject} };
 	qDebug() << mulitListObj.toString();
 	//QString key = "num1";

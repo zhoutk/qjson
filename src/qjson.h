@@ -564,6 +564,17 @@ namespace QJSON {
 
 	};
 
+	template <> Json& Json::add(const QString& name, const std::string& value) {
+		if (this->type == Type::Object) {
+			QJsonObject json = this->_obj_->object();
+			if (json.contains(name))
+				json.remove(name);
+			json.insert(name, QJsonValue::fromVariant(value.c_str()));
+			delete this->_obj_;
+			this->_obj_ = new QJsonDocument(json);
+		}
+		return *this;
+	}
 	template <> Json& Json::add(const QString& name, const std::nullptr_t&) {
 		if (this->type == Type::Object) {
 			QJsonObject json = this->_obj_->object();
@@ -593,6 +604,16 @@ namespace QJSON {
 				this->remove(name);
 				this->ExtendItem(name, value);
 			}
+		}
+		return *this;
+	}
+
+	template <> Json& Json::add(const std::string& value) {
+		if (this->type == Type::Array) {
+			QJsonArray json = this->_obj_->array();
+			json.push_back(QJsonValue::fromVariant(value.c_str()));
+			delete this->_obj_;
+			this->_obj_ = new QJsonDocument(json);
 		}
 		return *this;
 	}
