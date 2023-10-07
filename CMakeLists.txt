@@ -52,6 +52,7 @@ else()
 endif()
 
 find_package(Qt5Core)
+find_package(Qt5Test)
 
 include_directories($ENV{QTDIR}/include)
 include_directories($ENV{QTDIR}/include/QtCore)
@@ -65,19 +66,13 @@ add_executable(${PROJECT_NAME} ${SRC_FILES} ${HEAD_FILES})
 target_link_libraries(${PROJECT_NAME} Qt5::Core)
 
 ##--------------------- Build unit tests -----------------------------------##
-option(CMAKE_QJSON_ENABLE_TEST "Whether to enable unit tests" OFF)
+option(CMAKE_QJSON_ENABLE_TEST "Whether to enable unit tests" ON)
 if (CMAKE_QJSON_ENABLE_TEST)
     message(STATUS "Unit tests enabled")
     enable_testing()
-    add_subdirectory(thirds/googletest-1.14.0 EXCLUDE_FROM_ALL)
-    include_directories(thirds/googletest-1.14.0/googletest/include)
-
-    #add_executable(test_test tests/test_test.cpp)
-    #target_link_libraries(test_test gtest gtest_main)
-    #add_test(NAME test_test COMMAND test_test)
 
     add_executable(test_object tests/test_object.cpp)
-    target_link_libraries(test_object gtest gtest_main Qt5::Core)
+    target_link_libraries(test_object Qt5::Core Qt5::Test)
     add_test(NAME test_object COMMAND test_object)
 
     #add_executable(test_array tests/test_array.cpp)
