@@ -60,8 +60,6 @@ include_directories($ENV{QTDIR}/include/QtCore)
 FILE(GLOB_RECURSE SRC_FILES "./src/*.cpp") 
 FILE(GLOB_RECURSE HEAD_FILES "./src/*.h") 
 
-source_group("Head Files" FILES ${HEAD_FILES} )
-
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${HEAD_FILES})
 target_link_libraries(${PROJECT_NAME} Qt5::Core)
 
@@ -73,14 +71,10 @@ if (CMAKE_QJSON_ENABLE_TEST)
 
     add_executable(test_object tests/test_object.cpp)
     target_link_libraries(test_object Qt5::Core Qt5::Test)
-    add_test(NAME test_object COMMAND test_object)
+    add_test(NAME test_object COMMAND test_object)           # supprt ctest comman
 
     #add_executable(test_array tests/test_array.cpp)
     #target_link_libraries(test_array gtest gtest_main)
     #add_test(NAME test_array COMMAND test_array)
-
-    #add_executable(test_parse tests/test_parse.cpp)
-    #target_link_libraries(test_parse gtest gtest_main)
-    #add_test(NAME test_parse COMMAND test_parse)
 
 endif()
