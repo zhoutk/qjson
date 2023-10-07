@@ -28,11 +28,11 @@ private slots:
 			.add("DoubleObj1", 123.56)
 			.add("DoubleObj2", 758.000001001)
 			.add("DoubleObj3", 65536.0123456789)		//max numbers of decimal
-			.add("DoubleObj4", 987654321.1234567);		
-		QCOMPARE(obj.toString(), 
+			.add("DoubleObj4", 987654321.1234567);
+		QCOMPARE(obj.toString(),
 			"{\"CharObj\":65,\"DoubleObj1\":123.56,\"DoubleObj2\":758.000001001,\"DoubleObj3\":65536.0123456789,\"DoubleObj4\":987654321.1234567,\"IntObj\":1,\"NullObj\":null}");
 
-		Json sub{ {"number", 1}, {"string", "a string"}};
+		Json sub{ {"number", 1}, {"string", "a string"} };
 		obj = Json({									//object initializer_list ctor
 			{"first","this is the first."},
 			{"sub obj","{\"first\":\"one\",\"second\":\"two\"}"},
@@ -44,11 +44,14 @@ private slots:
 		obj.add("array2", arr);
 		QCOMPARE(obj.toString(),
 			"{\"arr1\":[1,2,3],\"array2\":[4,5,6],\"first\":\"this is the first.\",\"sub obj\":{\"first\":\"one\",\"second\":\"two\"},\"sub obj2\":{\"number\":1,\"string\":\"a string\"}}");
+	}
 
-		obj = Json("{\"arr1\":[1,2,3],\"sub obj2\":{\"number\":1,\"string\":\"a string\"},\"array2\":[4,5,6],\"first\":\"this is the first.\",\"sub obj\":{\"first\":\"one\",\"second\":\"two\"}}");
+	void testFind()
+	{
+		Json obj = Json("{\"arr1\":[1,2,3],\"sub obj2\":{\"number\":1,\"string\":\"a string\"},\"array2\":[4,5,6],\"first\":\"this is the first.\",\"sub obj\":{\"first\":\"one\",\"second\":\"two\"}}");
 		QCOMPARE(obj.toString(), "{\"arr1\":[1,2,3],\"array2\":[4,5,6],\"first\":\"this is the first.\",\"sub obj\":{\"first\":\"one\",\"second\":\"two\"},\"sub obj2\":{\"number\":1,\"string\":\"a string\"}}");
 	
-		ele = obj["first"];
+		Json ele = obj["first"];
 		QCOMPARE(ele.getValueType(), "String");
 		QCOMPARE(ele.toString(), "this is the first.");
 
@@ -78,7 +81,7 @@ private slots:
 		obj.remove("arr1");
 		QCOMPARE(obj.toString(), "{\"array2\":[4,5,6],\"first\":\"this is the first.\",\"sub obj2\":{\"number\":1,\"string\":\"a string\"}}");
 
-		sub = Json { {"number", 1}, {"string", "a string"}, {"first", "replace first content"} };
+		Json sub { {"number", 1}, {"string", "a string"}, {"first", "replace first content"} };
 		obj.extend(sub);
 		QCOMPARE(obj.toString(), "{\"array2\":[4,5,6],\"first\":\"replace first content\",\"number\":1,\"string\":\"a string\",\"sub obj2\":{\"number\":1,\"string\":\"a string\"}}");
 	}

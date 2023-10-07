@@ -73,8 +73,8 @@ if (CMAKE_QJSON_ENABLE_TEST)
     target_link_libraries(test_object Qt5::Core Qt5::Test)
     add_test(NAME test_object COMMAND test_object)           # supprt ctest comman
 
-    #add_executable(test_array tests/test_array.cpp)
-    #target_link_libraries(test_array gtest gtest_main)
-    #add_test(NAME test_array COMMAND test_array)
+    add_executable(test_array tests/test_array.cpp)
+    target_link_libraries(test_array Qt5::Core Qt5::Test)
+    add_test(NAME test_array COMMAND test_array)
 
 endif()
