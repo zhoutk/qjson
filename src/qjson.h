@@ -526,9 +526,19 @@ namespace QJSON {
 				rs.vdata = QString::number(v.toDouble(), 'f', getDecimalCount(v.toDouble()));
 				break;
 			case QJsonValue::String:
-				rs.type = Type::String;
-				rs._obj_ = new QJsonDocument();
-				rs.vdata = v.toString();
+				{
+					QJsonParseError json_error;
+					QJsonDocument* jsonDocument = new QJsonDocument(QJsonDocument::fromJson(v.toString().toUtf8(), &json_error));
+					if (json_error.error == QJsonParseError::NoError) {
+						delete rs._obj_;
+						rs._obj_ = jsonDocument;
+						rs.type = jsonDocument->isObject() ? Type::Object : Type::Array;
+					}
+					else {
+						rs.type = Type::String;
+						rs.vdata = v.toString();
+					}
+				}
 				break;
 			case QJsonValue::Bool:
 				rs.type = v.toBool() ? Type::True : Type::False;
