@@ -157,7 +157,7 @@ ajson序列化后结果为：
     ]
 }
 ```
-详情请参看demo.cpp
+详情请参看相应的测试用例代码。
 
 ## 项目地址
 ```
@@ -179,7 +179,7 @@ cd build && cmake --build .
 ---linux & mac
 cd build && make
 
-run qjson
+run qjson or ctest
 ```
 
 ## 相关项目

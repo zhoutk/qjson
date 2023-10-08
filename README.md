@@ -89,12 +89,12 @@ enum class JsonType
 
     Json ajson(JsonType::Object);                
     std::string data = "kevin";                     
-    ajson.add("fail", false);             
-    ajson.add("name", data);              
-    ajson.add("school-en", "the 85th.");   
+    ajson.add("fail", false)          // chain call
+         .add("name", data);              
+         .add("school-en", "the 85th.");   
     ajson.add("age", 10);                  
     ajson.add("scores", 95.98);            
-    ajson.add("nullkey", nullptr);         
+         .add("nullkey", nullptr);         
 
     Json sub;                                  
     sub.add("math", 99);                 
@@ -151,7 +151,7 @@ result of  ajson：
     ]
 }
 ```
-Detailed description, please move to demo.cpp.
+Detailed description, please look over codes of unit test in the tests catalogue.
 
 ## Project site
 ```
@@ -173,7 +173,7 @@ cd build && cmake --build .
 ---linux & mac
 cd build && make
 
-run qjson
+run qjson or ctest
 ```
 
 ## Associated projects
