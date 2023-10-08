@@ -45,8 +45,6 @@ task list：
 - [x] RemoveFirst - remove the first of array
 - [x] RemoveLast - remove the last of array
 - [x] std::move
-  
-## Data structure
 
 ### Json node type   
 > For internal use, the data type is only used inside the Json class
