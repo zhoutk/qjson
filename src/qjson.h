@@ -351,9 +351,9 @@ namespace QJSON {
 					QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().toUtf8(), &json_error);
 					if (json_error.error == QJsonParseError::NoError) {
 						arr.insert(index, QJsonValue::fromVariant(QVariant(jsonDocument)));
+						delete this->_obj_;
+						this->_obj_ = new QJsonDocument(arr);
 					}
-					delete this->_obj_;
-					this->_obj_ = new QJsonDocument(arr);
 				}
 				else {
 					Json rear = this->takes(index);
@@ -606,9 +606,9 @@ namespace QJSON {
 				QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().toUtf8(), &json_error);
 				if (json_error.error == QJsonParseError::NoError) {
 					json.insert(name, QJsonValue::fromVariant(QVariant(jsonDocument)));
+					delete this->_obj_;
+					this->_obj_ = new QJsonDocument(json);
 				}
-				delete this->_obj_;
-				this->_obj_ = new QJsonDocument(json);
 			}
 			else {
 				this->remove(name);
@@ -644,9 +644,9 @@ namespace QJSON {
 				QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().toUtf8(), &json_error);
 				if (json_error.error == QJsonParseError::NoError) {
 					json.push_back(QJsonValue::fromVariant(QVariant(jsonDocument)));
+					delete this->_obj_;
+					this->_obj_ = new QJsonDocument(json);
 				}
-				delete this->_obj_;
-				this->_obj_ = new QJsonDocument(json);
 			}
 			else {
 				this->ExtendItem(value);

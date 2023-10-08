@@ -9,7 +9,7 @@ class JsonObjectTest : public QObject
 	Q_OBJECT
 
 private slots:
-	void testAdd()
+	void testObjAdd()
 	{
 		Json obj;
 		QVERIFY(obj.getValueType() == "Object");
@@ -46,7 +46,7 @@ private slots:
 			"{\"arr1\":[1,2,3],\"array2\":[4,5,6],\"first\":\"this is the first.\",\"sub obj\":{\"first\":\"one\",\"second\":\"two\"},\"sub obj2\":{\"number\":1,\"string\":\"a string\"}}");
 	}
 
-	void testFind()
+	void testObjFind()
 	{
 		Json obj = Json("{\"arr1\":[1,2,3],\"sub obj2\":{\"number\":1,\"string\":\"a string\"},\"array2\":[4,5,6],\"first\":\"this is the first.\",\"sub obj\":{\"first\":\"one\",\"second\":\"two\"}}");
 		QCOMPARE(obj.toString(), "{\"arr1\":[1,2,3],\"array2\":[4,5,6],\"first\":\"this is the first.\",\"sub obj\":{\"first\":\"one\",\"second\":\"two\"},\"sub obj2\":{\"number\":1,\"string\":\"a string\"}}");

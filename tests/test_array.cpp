@@ -9,7 +9,7 @@ class JsonArrayTest : public QObject
 	Q_OBJECT
 
 private slots:
-	void testAdd()
+	void testArray()
 	{
 		Json arr(JsonType::Array);
 		QVERIFY(arr.getValueType() == "Array");
