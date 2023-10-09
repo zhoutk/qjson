@@ -1,4 +1,5 @@
-#pragma once
+#ifndef QJSON_H
+#define QJSON_H
 
 #include <QJsonDocument>
 #include <QString>
@@ -6,6 +7,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonParseError>
+#include <QFile>
 
 namespace QJSON {
 	enum class JsonType
@@ -89,16 +91,8 @@ namespace QJSON {
 		}
 
 		Json(const char* data) {
-			new (this)Json(std::string(data));
-		}
-
-		Json(std::string data) {
-			new (this)Json(QString::fromStdString(data));
-		}
-
-		Json(QString data) {
 			QJsonParseError json_error;
-			QJsonDocument* jsonDocument = new QJsonDocument(QJsonDocument::fromJson(data.toUtf8(), &json_error));
+			QJsonDocument* jsonDocument = new QJsonDocument(QJsonDocument::fromJson(data, &json_error));
 			if (json_error.error == QJsonParseError::NoError) {
 				_obj_ = jsonDocument;
 				this->type = jsonDocument->isObject() ? Type::Object : Type::Array;
@@ -108,6 +102,14 @@ namespace QJSON {
 				this->type = Type::String;
 				vdata = data;
 			}
+		}
+
+		Json(std::string data) {
+			new (this)Json(data.c_str());
+		}
+
+		Json(QString data) {
+			new (this)Json(data.toStdString().c_str());
 		}
 
 		Json(std::initializer_list<QPair<const QString, Json>> values);
@@ -482,6 +484,18 @@ namespace QJSON {
 			return *this;
 		}
 
+		static Json FromFile(const char* filepath) {
+			QFile file(filepath);
+			if (file.open(QIODevice::ReadOnly))
+				return Json(QString(file.readAll()));
+			else
+				return Json(Type::Error);
+		}
+
+		static Json FromFile(const QString& filepath) {
+			return Json::FromFile(filepath.toStdString().c_str());
+		}
+
 		~Json() {
 			if (_obj_)
 				delete _obj_;
@@ -723,3 +737,5 @@ namespace QJSON {
 	}
 
 }
+
+#endif // QJSON_H
