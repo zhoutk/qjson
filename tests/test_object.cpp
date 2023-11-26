@@ -15,7 +15,7 @@ private slots:
 		QVERIFY(obj.getValueType() == "Object");
 		obj.add("FalseObj", false);
 
-		QCOMPARE(obj.toString(), "{\"FalseObj\":false}");
+		QCOMPARE(obj.toString().toStdString(), "{\"FalseObj\":false}");
 		Json ele = obj.take("FalseObj");
 
 		QCOMPARE(ele.toString(), "false");
