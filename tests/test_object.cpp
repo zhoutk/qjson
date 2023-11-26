@@ -15,7 +15,7 @@ private slots:
 		QVERIFY(obj.getValueType() == "Object");
 		obj.add("FalseObj", false);
 
-		QCOMPARE(obj.toString().toStdString(), "{\"FalseObj\":false}");
+		QCOMPARE(obj.toString(), "{\"FalseObj\":false}");
 		Json ele = obj.take("FalseObj");
 
 		QCOMPARE(ele.toString(), "false");
@@ -71,11 +71,17 @@ private slots:
 		QCOMPARE(ele.getValueType(), "Number");
 		QCOMPARE(ele.toString(), "5");
 
-		QStringList keyList = obj.getAllKeys();
+		std::vector<std::string> ls = obj.getAllKeys();
+		QStringList keyList;
+		for (auto al : ls)
+			keyList << QString::fromStdString(al);
 		QCOMPARE(keyList.join(','), "arr1,array2,first,sub obj,sub obj2");
 
 		obj.remove("sub obj");
-		keyList = obj.getAllKeys();
+		ls = obj.getAllKeys();
+		keyList.clear();
+		for (auto al : ls)
+			keyList << QString::fromStdString(al);
 		QCOMPARE(keyList.join(','), "arr1,array2,first,sub obj2");
 
 		obj.remove("arr1");

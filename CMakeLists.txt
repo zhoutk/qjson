@@ -61,7 +61,7 @@ add_executable(${PROJECT_NAME} ${SRC_FILES} ${HEAD_FILES})
 target_link_libraries(${PROJECT_NAME} Qt5::Core)
 
 ##--------------------- Build unit tests -----------------------------------##
-option(CMAKE_QJSON_ENABLE_TEST "Whether to enable unit tests" OFF)
+option(CMAKE_QJSON_ENABLE_TEST "Whether to enable unit tests" ON)
 if (CMAKE_QJSON_ENABLE_TEST)
     message(STATUS "Unit tests enabled")
     enable_testing()

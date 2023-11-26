@@ -441,7 +441,7 @@ namespace QJSON {
 		Json& clear() {
 			if (this->type == Type::Array || this->type == Type::Object) {
 				deleteThisObj(this->_obj_);
-				this->_obj_ = nullptr;
+				this->_obj_ = new QJsonDocument();
 			}
 			else
 				this->vdata.clear();
