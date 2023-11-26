@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 		{"array", "not support"},
 		{"objStr", "{\"first\":\"one\",\"second\":\"two\"}"},
 		{"okey", subObject} };
-	qDebug() << mulitListObj.toString();
+	std::cout << mulitListObj.toString();
 	//QString key = "num1";
 	//qDebug() << "  ---  " << one.toString();
 

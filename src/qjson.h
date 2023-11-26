@@ -1,13 +1,14 @@
 #ifndef QJSON_H
 #define QJSON_H
 
+#include <QVariant>
 #include <QJsonDocument>
 #include <QString>
-#include <QDebug>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonParseError>
 #include <QFile>
+#include <iostream>
 
 namespace QJSON {
 	enum class JsonType
@@ -18,14 +19,14 @@ namespace QJSON {
 
 	class Json final {
 		public:
-		template <typename T> Json& add(const QString& name, const T& value)  //object add not nullptr or Json
+		template <typename T> Json& add(const std::string& name, const T& value)  //object add not nullptr or Json
 		{
 			if (this->type == Type::Object) {
 				QJsonObject json = this->_obj_->object();
-				if (json.contains(name))
-					json.remove(name);
-				json.insert(name, QJsonValue::fromVariant(value));
-				delete this->_obj_;
+				if (json.contains(QString::fromStdString(name)))
+					json.remove(QString::fromStdString(name));
+				json.insert(QString::fromStdString(name), QJsonValue::fromVariant(value));
+				deleteThisObj(this->_obj_);
 				this->_obj_ = new QJsonDocument(json);
 			}
 			return *this;
@@ -35,7 +36,7 @@ namespace QJSON {
 			if (this->type == Type::Array) {
 				QJsonArray json = this->_obj_->array();
 				json.push_back(QJsonValue::fromVariant(value));
-				delete this->_obj_;
+				deleteThisObj(this->_obj_);
 				this->_obj_ = new QJsonDocument(json);
 			}
 			return *this;
@@ -51,7 +52,7 @@ namespace QJSON {
 		Json() : Json(JsonType::Object) {}
 
 		Json(JsonType type) : type((Type)type) {
-			_obj_ = new QJsonDocument;
+			_obj_ = new QJsonDocument();
 		}
 
 		Json(std::nullptr_t) {
@@ -98,7 +99,7 @@ namespace QJSON {
 				this->type = jsonDocument->isObject() ? Type::Object : Type::Array;
 			}
 			else {
-				_obj_ = new QJsonDocument;
+				_obj_ = nullptr;
 				this->type = Type::String;
 				vdata = data;
 			}
@@ -108,16 +109,15 @@ namespace QJSON {
 			new (this)Json(data.c_str());
 		}
 
-		Json(QString data) {
-			new (this)Json(data.toStdString().c_str());
-		}
-
-		Json(std::initializer_list<QPair<const QString, Json>> values);
+		Json(std::initializer_list<std::pair<const std::string, Json>> values);
 
 		Json(const Json& origin) {
 			this->type = origin.type;
 			this->vdata = origin.vdata;
-			this->_obj_ = new QJsonDocument(*origin._obj_);
+			if (origin._obj_)
+				this->_obj_ = new QJsonDocument(*origin._obj_);
+			else
+				this->_obj_ = nullptr;
 		}
 
 		Json(Json&& rhs) {
@@ -161,17 +161,17 @@ namespace QJSON {
 			return rs;
 		}
 
-		Json operator[](const QString& key) {
+		Json operator[](const std::string& key) {
 			Json rs(Type::Error);
 			if (this->type == Type::Object) {
 				QJsonObject obj = this->_obj_->object();
-				QJsonValue v = obj[key];
+				QJsonValue v = obj[QString::fromStdString(key)];
 				parseValueToJson(rs, v);
 			}
 			return rs;
 		}
 
-		QString toString() const {
+		std::string toString() const {
 			switch (this->type)
 			{
 			case Type::Array:
@@ -179,7 +179,7 @@ namespace QJSON {
 				return this->_obj_->toJson(QJsonDocument::Compact);
 			case Type::Number:
 			case Type::String:
-				return this->vdata;
+				return this->vdata.toStdString();
 			case Type::True:
 				return "true";
 			case Type::False:
@@ -191,16 +191,16 @@ namespace QJSON {
 			}
 		}
 
-		bool contains(const QString& key) {
+		bool contains(const std::string& key) {
 			Json f = (*this)[key];
 			return !(f.type == Type::Null || f.type == Type::Error);
 		}
 
-		QString getValueType() {
-			return TYPENAMES[this->type];
+		std::string getValueType() {
+			return TYPENAMES[this->type].toStdString();
 		}
 
-		Json take(const QString& key) {		//get and remove of Object
+		Json take(const std::string& key) {		//get and remove of Object
 			if (this->type == Type::Object) {
 				Json rs = (*this)[key];
 				if ((rs.type != Type::Null && rs.type != Type::Error)) 
@@ -237,11 +237,12 @@ namespace QJSON {
 				return Json(Type::Error);
 		}
 
-		QStringList getAllKeys() {
-			QStringList rs;
+		std::vector<std::string> getAllKeys() {
+			std::vector<std::string> rs;
 			if (this->type == Type::Object) {
 				QJsonObject obj = this->_obj_->object();
-				return obj.keys();
+				for (QString al : obj.keys())
+					rs.push_back(al.toStdString());
 			}
 			return rs;
 		}
@@ -258,7 +259,7 @@ namespace QJSON {
 						tobj.insert(it.key(), it.value());
 						it++;
 					}
-					delete this->_obj_;
+					deleteThisObj(this->_obj_);
 					this->_obj_ = new QJsonDocument(tobj);
 				}
 			}
@@ -272,7 +273,7 @@ namespace QJSON {
 					QJsonArray varr = value._obj_->array();
 					for (int i = 0; i < varr.size(); i++) 
 						tarr.push_back(varr[i]);
-					delete this->_obj_;
+					deleteThisObj(this->_obj_);
 					this->_obj_ = new QJsonDocument(tarr);
 				}
 				else if (value.type == Type::Object) {
@@ -285,7 +286,7 @@ namespace QJSON {
 						tarr.push_back(it.value());
 						it++;
 					}
-					delete this->_obj_;
+					deleteThisObj(this->_obj_);
 					this->_obj_ = new QJsonDocument(tarr);
 				}
 				else {
@@ -350,10 +351,10 @@ namespace QJSON {
 				if (value.type == Type::Array || value.type == Object) {
 					QJsonArray arr = this->_obj_->array();
 					QJsonParseError json_error;
-					QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().toUtf8(), &json_error);
+					QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().c_str(), &json_error);
 					if (json_error.error == QJsonParseError::NoError) {
 						arr.insert(index, QJsonValue::fromVariant(QVariant(jsonDocument)));
-						delete this->_obj_;
+						deleteThisObj(this->_obj_);
 						this->_obj_ = new QJsonDocument(arr);
 					}
 				}
@@ -429,8 +430,8 @@ namespace QJSON {
 				return false;
 		}
 
-		QVector<Json> toVector() {
-			QVector<Json> rs;
+		std::vector<Json> toVector() {
+			std::vector<Json> rs;
 			if (this->type == Type::Array) 
 				for (int i = 0; i < this->size(); i++)
 					rs.push_back((*this)[i]);
@@ -439,20 +440,20 @@ namespace QJSON {
 
 		Json& clear() {
 			if (this->type == Type::Array || this->type == Type::Object) {
-				delete this->_obj_;
-				this->_obj_ = new QJsonDocument;
+				deleteThisObj(this->_obj_);
+				this->_obj_ = nullptr;
 			}
 			else
 				this->vdata.clear();
 			return *this;
 		}
 
-		Json& remove(const QString& name) {
-			if (this->type == Type::Object) {
+		Json& remove(const std::string& name) {
+			if (this->type == Type::Object && this->_obj_) {
 				QJsonObject json = this->_obj_->object();
-				if (json.contains(name))
-					json.remove(name);
-				delete this->_obj_;
+				if (json.contains(QString::fromStdString(name)))
+					json.remove(QString::fromStdString(name));
+				deleteThisObj(this->_obj_);
 				this->_obj_ = new QJsonDocument(json);
 			}
 			return *this;
@@ -463,7 +464,7 @@ namespace QJSON {
 				if (index >= 0 && index < this->size()) {
 					QJsonArray json = this->_obj_->array();
 					json.removeAt(index);
-					delete this->_obj_;
+					deleteThisObj(this->_obj_);
 					this->_obj_ = new QJsonDocument(json);
 				}
 			}
@@ -487,13 +488,13 @@ namespace QJSON {
 		static Json FromFile(const char* filepath) {
 			QFile file(filepath);
 			if (file.open(QIODevice::ReadOnly))
-				return Json(QString(file.readAll()));
+				return Json(std::string(file.readAll()));
 			else
 				return Json(Type::Error);
 		}
 
-		static Json FromFile(const QString& filepath) {
-			return Json::FromFile(filepath.toStdString().c_str());
+		static Json FromFile(const std::string& filepath) {
+			return Json::FromFile(filepath.c_str());
 		}
 
 		~Json() {
@@ -536,7 +537,7 @@ namespace QJSON {
 				break;
 			case QJsonValue::Double:
 				rs.type = Type::Number;
-				rs._obj_ = new QJsonDocument();
+				rs._obj_ = nullptr;
 				rs.vdata = QString::number(v.toDouble(), 'f', getDecimalCount(v.toDouble()));
 				break;
 			case QJsonValue::String:
@@ -556,16 +557,23 @@ namespace QJSON {
 				break;
 			case QJsonValue::Bool:
 				rs.type = v.toBool() ? Type::True : Type::False;
-				rs._obj_ = new QJsonDocument();
+				rs._obj_ = nullptr;
 				break;
 			case QJsonValue::Null:
 				rs.type = Type::Null;
-				rs._obj_ = new QJsonDocument();
+				rs._obj_ = nullptr;
 				break;
 			default:
 				rs.type = Type::Error;
-				rs._obj_ = new QJsonDocument();
+				rs._obj_ = nullptr;
 				break;
+			}
+		}
+
+		void deleteThisObj(QJsonDocument* obj) {
+			if (obj) {
+				delete obj;
+				obj = nullptr;
 			}
 		}
 
@@ -583,44 +591,44 @@ namespace QJSON {
 			return ct;
 		}
 
-		void ExtendItem(const QString& name, const Json& cur);
+		void ExtendItem(const std::string& name, const Json& cur);
 		void ExtendItem(const Json& cur);
 
 	};
 
-	template <> Json& Json::add(const QString& name, const std::string& value) {
+	template <> Json& Json::add(const std::string& name, const std::string& value) {
 		if (this->type == Type::Object) {
 			QJsonObject json = this->_obj_->object();
-			if (json.contains(name))
-				json.remove(name);
-			json.insert(name, QJsonValue::fromVariant(value.c_str()));
-			delete this->_obj_;
+			if (json.contains(QString::fromStdString(name)))
+				json.remove(QString::fromStdString(name));
+			json.insert(QString::fromStdString(name), QJsonValue::fromVariant(value.c_str()));
+			deleteThisObj(this->_obj_);
 			this->_obj_ = new QJsonDocument(json);
 		}
 		return *this;
 	}
-	template <> Json& Json::add(const QString& name, const std::nullptr_t&) {
+	template <> Json& Json::add(const std::string& name, const std::nullptr_t&) {
 		if (this->type == Type::Object) {
 			QJsonObject json = this->_obj_->object();
-			if (json.contains(name))
-				json.remove(name);
-			json.insert(name, QJsonValue::Null);
-			delete this->_obj_;
+			if (json.contains(QString::fromStdString(name)))
+				json.remove(QString::fromStdString(name));
+			json.insert(QString::fromStdString(name), QJsonValue::Null);
+			deleteThisObj(this->_obj_);
 			this->_obj_ = new QJsonDocument(json);
 		}
 		return *this;
 	}
-	template <> Json& Json::add(const QString& name, const Json& value) {
+	template <> Json& Json::add(const std::string& name, const Json& value) {
 		if (this->type == Type::Object) {
 			if (value.type == Type::Array || value.type == Object) {
 				QJsonObject json = this->_obj_->object();
-				if (json.contains(name))
-					json.remove(name);
+				if (json.contains(QString::fromStdString(name)))
+					json.remove(QString::fromStdString(name));
 				QJsonParseError json_error;
-				QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().toUtf8(), &json_error);
+				QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().c_str(), &json_error);
 				if (json_error.error == QJsonParseError::NoError) {
-					json.insert(name, QJsonValue::fromVariant(QVariant(jsonDocument)));
-					delete this->_obj_;
+					json.insert(QString::fromStdString(name), QJsonValue::fromVariant(QVariant(jsonDocument)));
+					deleteThisObj(this->_obj_);
 					this->_obj_ = new QJsonDocument(json);
 				}
 			}
@@ -636,7 +644,7 @@ namespace QJSON {
 		if (this->type == Type::Array) {
 			QJsonArray json = this->_obj_->array();
 			json.push_back(QJsonValue::fromVariant(value.c_str()));
-			delete this->_obj_;
+			deleteThisObj(this->_obj_);
 			this->_obj_ = new QJsonDocument(json);
 		}
 		return *this;
@@ -645,7 +653,7 @@ namespace QJSON {
 		if (this->type == Type::Array) {
 			QJsonArray json = this->_obj_->array();
 			json.push_back(QJsonValue::Null);
-			delete this->_obj_;
+			deleteThisObj(this->_obj_);
 			this->_obj_ = new QJsonDocument(json);
 		}
 		return *this;
@@ -655,10 +663,10 @@ namespace QJSON {
 			if (value.type == Type::Array || value.type == Object) {
 				QJsonArray json = this->_obj_->array();
 				QJsonParseError json_error;
-				QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().toUtf8(), &json_error);
+				QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().c_str(), &json_error);
 				if (json_error.error == QJsonParseError::NoError) {
 					json.push_back(QJsonValue::fromVariant(QVariant(jsonDocument)));
-					delete this->_obj_;
+					deleteThisObj(this->_obj_);
 					this->_obj_ = new QJsonDocument(json);
 				}
 			}
@@ -669,9 +677,9 @@ namespace QJSON {
 		return *this;
 	}
 
-	Json::Json(std::initializer_list<QPair<const QString, Json>> values) {
+	Json::Json(std::initializer_list<std::pair<const std::string, Json>> values) {
 		new (this)Json();
-		for (QPair<const QString, Json> al : values) {
+		for (std::pair<const std::string, Json> al : values) {
 			this->add(al.first, al.second);
 		}
 	}
@@ -682,7 +690,7 @@ namespace QJSON {
 		return *this;
 	}
 
-	void Json::ExtendItem(const QString& name, const Json& cur) {			//Object
+	void Json::ExtendItem(const std::string& name, const Json& cur) {			//Object
 		switch (cur.type)
 		{
 		case Type::False:
