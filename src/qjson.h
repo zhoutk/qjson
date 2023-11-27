@@ -50,7 +50,10 @@ namespace QJSON {
 		Json() : Json(JsonType::Object) {}
 
 		Json(JsonType type) : type((Type)type) {
-			_obj_ = new QJsonDocument();
+			if (type == JsonType::Array || type == JsonType::Object)
+				_obj_ = new QJsonDocument();
+			else
+				_obj_ = nullptr;
 		}
 
 		Json(std::nullptr_t) {
@@ -521,7 +524,12 @@ namespace QJSON {
 
 
 		Json(Type type) {
-			new (this)Json();
+			if (type == Object || type == Array) {
+				this->_obj_ = new QJsonDocument;
+			}
+			else {
+				this->_obj_ = nullptr;
+			}
 			this->type = type;
 		}
 
