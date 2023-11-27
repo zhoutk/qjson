@@ -147,7 +147,7 @@ namespace QJSON {
 			return *(new (this)Json(std::move(rhs)));
 		}
 
-		Json operator[](const int& index) {
+		Json operator[](const int& index) const {
 			Json rs(Type::Error);
 			if (this->type == Type::Array) {
 				QJsonArray arr = this->_obj_->array();
@@ -159,7 +159,7 @@ namespace QJSON {
 			return rs;
 		}
 
-		Json operator[](const std::string& key) {
+		Json operator[](const std::string& key) const {
 			Json rs(Type::Error);
 			if (this->type == Type::Object) {
 				QJsonObject obj = this->_obj_->object();
@@ -189,12 +189,12 @@ namespace QJSON {
 			}
 		}
 
-		bool contains(const std::string& key) {
+		bool contains(const std::string& key) const {
 			Json f = (*this)[key];
 			return !(f.type == Type::Null || f.type == Type::Error);
 		}
 
-		std::string getValueType() {
+		std::string getValueType() const {
 			return TYPENAMES[this->type].toStdString();
 		}
 
@@ -221,21 +221,21 @@ namespace QJSON {
 				return Json(Type::Error);
 		}
 
-		Json first() {
+		Json first() const {
 			if (this->type == Type::Array && this->size() > 0)
 				return (*this)[0];
 			else
 				return Json(Type::Error);
 		}
 
-		Json last() {
+		Json last() const {
 			if (this->type == Type::Array && this->size() > 0)
 				return (*this)[this->size() - 1];
 			else
 				return Json(Type::Error);
 		}
 
-		std::vector<std::string> getAllKeys() {
+		std::vector<std::string> getAllKeys() const {
 			std::vector<std::string> rs;
 			if (this->type == Type::Object) {
 				QJsonObject obj = this->_obj_->object();
@@ -317,7 +317,7 @@ namespace QJSON {
 			return *this;
 		}
 
-		Json slice(int start, int end = 0) {
+		Json slice(int start, int end = 0) const {
 			Json rs(Type::Array);
 			if (this->type == Type::Array) {
 				if (end == 0)
@@ -362,69 +362,69 @@ namespace QJSON {
 			return *this;
 		}
 
-		int size() {
+		int size() const {
 			if (this->type == Type::Array) 
 				return this->_obj_->array().size();
 			else
 				return 0;
 		}
 
-		bool isError() {
+		bool isError() const {
 			return this->type == Type::Error;
 		}
 
-		bool isNull() {
+		bool isNull() const {
 			return this->type == Type::Null;
 		}
 
-		bool isObject() {
+		bool isObject() const {
 			return this->type == Type::Object;
 		}
 
-		bool isArray() {
+		bool isArray() const {
 			return this->type == Type::Array;
 		}
 
-		bool isNumber() {
+		bool isNumber() const {
 			return this->type == Type::Number;
 		}
 
-		bool isTrue() {
+		bool isTrue() const {
 			return this->type == Type::True;
 		}
 
-		bool isFalse() {
+		bool isFalse() const {
 			return this->type == Type::False;
 		}
 
-		bool isString() {
+		bool isString() const {
 			return this->type == Type::String;
 		}
 
-		bool isEmpty() {
+		bool isEmpty() const {
 			return this->size() <= 0;
 		}
 
-		float toFloat() {
+		float toFloat() const {
 			return (float)this->toDouble();
 		}
 
-		int toInt() {
+		int toInt() const {
 			return (int)this->toDouble();
 		}
 
-		double toDouble() {
+		double toDouble() const {
 			return this->vdata.toDouble();
 		}
 
-		bool toBool() {
+		bool toBool() const {
 			if (this->type == Type::True)
 				return true;
 			else
 				return false;
 		}
 
-		std::vector<Json> toVector() {
+		std::vector<Json> toVector() const {
 			std::vector<Json> rs;
 			if (this->type == Type::Array) 
 				for (int i = 0; i < this->size(); i++)
@@ -525,7 +525,7 @@ namespace QJSON {
 			this->type = type;
 		}
 
-		void parseValueToJson(Json& rs, const QJsonValue& v) {
+		void parseValueToJson(Json& rs, const QJsonValue& v) const {
 			switch (v.type())
 			{
 			case QJsonValue::Array:
@@ -571,7 +571,7 @@ namespace QJSON {
 			}
 		}
 
-		int getDecimalCount(double data) {
+		int getDecimalCount(double data) const {
 			data = qAbs(data);
 			data -= (int)data;
 			int ct = 0;
