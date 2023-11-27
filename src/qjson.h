@@ -26,8 +26,7 @@ namespace QJSON {
 				if (json.contains(QString::fromStdString(name)))
 					json.remove(QString::fromStdString(name));
 				json.insert(QString::fromStdString(name), QJsonValue::fromVariant(value));
-				deleteThisObj(this->_obj_);
-				this->_obj_ = new QJsonDocument(json);
+				this->_obj_->setObject(json);
 			}
 			return *this;
 		};
@@ -36,8 +35,7 @@ namespace QJSON {
 			if (this->type == Type::Array) {
 				QJsonArray json = this->_obj_->array();
 				json.push_back(QJsonValue::fromVariant(value));
-				deleteThisObj(this->_obj_);
-				this->_obj_ = new QJsonDocument(json);
+				this->_obj_->setArray(json);
 			}
 			return *this;
 		}
@@ -259,8 +257,7 @@ namespace QJSON {
 						tobj.insert(it.key(), it.value());
 						it++;
 					}
-					deleteThisObj(this->_obj_);
-					this->_obj_ = new QJsonDocument(tobj);
+					this->_obj_->setObject(tobj);
 				}
 			}
 			return *this;
@@ -273,8 +270,7 @@ namespace QJSON {
 					QJsonArray varr = value._obj_->array();
 					for (int i = 0; i < varr.size(); i++) 
 						tarr.push_back(varr[i]);
-					deleteThisObj(this->_obj_);
-					this->_obj_ = new QJsonDocument(tarr);
+					this->_obj_->setArray(tarr);
 				}
 				else if (value.type == Type::Object) {
 					QJsonArray tarr = this->_obj_->array();
@@ -286,8 +282,7 @@ namespace QJSON {
 						tarr.push_back(it.value());
 						it++;
 					}
-					deleteThisObj(this->_obj_);
-					this->_obj_ = new QJsonDocument(tarr);
+					this->_obj_->setArray(tarr);
 				}
 				else {
 					this->ExtendItem(value);
@@ -354,8 +349,7 @@ namespace QJSON {
 					QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().c_str(), &json_error);
 					if (json_error.error == QJsonParseError::NoError) {
 						arr.insert(index, QJsonValue::fromVariant(QVariant(jsonDocument)));
-						deleteThisObj(this->_obj_);
-						this->_obj_ = new QJsonDocument(arr);
+						this->_obj_->setArray(arr);
 					}
 				}
 				else {
@@ -439,9 +433,18 @@ namespace QJSON {
 		}
 
 		Json& clear() {
-			if (this->type == Type::Array || this->type == Type::Object) {
-				deleteThisObj(this->_obj_);
-				this->_obj_ = new QJsonDocument();
+			if (this->type == Type::Array) {
+				QJsonArray arr = this->_obj_->array();
+				while (!arr.isEmpty())
+					arr.removeLast();
+				this->_obj_->setArray(arr);
+			} 
+			else if(this->type == Type::Object) {
+				QJsonObject json = this->_obj_->object();
+				QJsonObject::iterator iter = json.begin();
+				while (iter != json.end())
+					json.remove(iter.key());
+				this->_obj_->setObject(json);
 			}
 			else
 				this->vdata.clear();
@@ -453,8 +456,7 @@ namespace QJSON {
 				QJsonObject json = this->_obj_->object();
 				if (json.contains(QString::fromStdString(name)))
 					json.remove(QString::fromStdString(name));
-				deleteThisObj(this->_obj_);
-				this->_obj_ = new QJsonDocument(json);
+				this->_obj_->setObject(json);
 			}
 			return *this;
 		}
@@ -464,8 +466,7 @@ namespace QJSON {
 				if (index >= 0 && index < this->size()) {
 					QJsonArray json = this->_obj_->array();
 					json.removeAt(index);
-					deleteThisObj(this->_obj_);
-					this->_obj_ = new QJsonDocument(json);
+					this->_obj_->setArray(json);
 				}
 			}
 			return *this;
@@ -570,13 +571,6 @@ namespace QJSON {
 			}
 		}
 
-		void deleteThisObj(QJsonDocument* obj) {
-			if (obj) {
-				delete obj;
-				obj = nullptr;
-			}
-		}
-
 		int getDecimalCount(double data) {
 			data = qAbs(data);
 			data -= (int)data;
@@ -602,8 +596,7 @@ namespace QJSON {
 			if (json.contains(QString::fromStdString(name)))
 				json.remove(QString::fromStdString(name));
 			json.insert(QString::fromStdString(name), QJsonValue::fromVariant(value.c_str()));
-			deleteThisObj(this->_obj_);
-			this->_obj_ = new QJsonDocument(json);
+			this->_obj_->setObject(json);
 		}
 		return *this;
 	}
@@ -613,8 +606,7 @@ namespace QJSON {
 			if (json.contains(QString::fromStdString(name)))
 				json.remove(QString::fromStdString(name));
 			json.insert(QString::fromStdString(name), QJsonValue::Null);
-			deleteThisObj(this->_obj_);
-			this->_obj_ = new QJsonDocument(json);
+			this->_obj_->setObject(json);
 		}
 		return *this;
 	}
@@ -628,8 +620,7 @@ namespace QJSON {
 				QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().c_str(), &json_error);
 				if (json_error.error == QJsonParseError::NoError) {
 					json.insert(QString::fromStdString(name), QJsonValue::fromVariant(QVariant(jsonDocument)));
-					deleteThisObj(this->_obj_);
-					this->_obj_ = new QJsonDocument(json);
+					this->_obj_->setObject(json);
 				}
 			}
 			else {
@@ -644,8 +635,7 @@ namespace QJSON {
 		if (this->type == Type::Array) {
 			QJsonArray json = this->_obj_->array();
 			json.push_back(QJsonValue::fromVariant(value.c_str()));
-			deleteThisObj(this->_obj_);
-			this->_obj_ = new QJsonDocument(json);
+			this->_obj_->setArray(json);
 		}
 		return *this;
 	}
@@ -653,8 +643,7 @@ namespace QJSON {
 		if (this->type == Type::Array) {
 			QJsonArray json = this->_obj_->array();
 			json.push_back(QJsonValue::Null);
-			deleteThisObj(this->_obj_);
-			this->_obj_ = new QJsonDocument(json);
+			this->_obj_->setArray(json);
 		}
 		return *this;
 	}
@@ -666,8 +655,7 @@ namespace QJSON {
 				QJsonDocument jsonDocument = QJsonDocument::fromJson(value.toString().c_str(), &json_error);
 				if (json_error.error == QJsonParseError::NoError) {
 					json.push_back(QJsonValue::fromVariant(QVariant(jsonDocument)));
-					deleteThisObj(this->_obj_);
-					this->_obj_ = new QJsonDocument(json);
+					this->_obj_->setArray(json);
 				}
 			}
 			else {
